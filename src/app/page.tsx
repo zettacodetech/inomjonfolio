@@ -1,14 +1,16 @@
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProfileCard } from "@/components/home/ProfileCard";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
-import { getPortfolioStats, getTestimonialViews } from "@/lib/data";
+import { SkillsMarquee } from "@/components/home/SkillsMarquee";
+import { getPortfolioStats, getSkillViews, getTestimonialViews } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [testimonials, stats] = await Promise.all([
+  const [testimonials, stats, skills] = await Promise.all([
     getTestimonialViews(),
     getPortfolioStats(),
+    getSkillViews(),
   ]);
 
   return (
@@ -18,6 +20,7 @@ export default async function HomePage() {
           <HeroSection />
           <ProfileCard stats={stats} />
         </div>
+        <SkillsMarquee skills={skills} />
         <TestimonialsSection testimonials={testimonials} />
       </div>
     </main>

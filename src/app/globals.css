@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --bg: #f4f4f5;
+    --bg: #f9f9fa;
     --bg-card: #ffffff;
     --border: rgba(0, 0, 0, 0.09);
     --text: #18181b;
@@ -39,6 +39,12 @@
     transition: background-color 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
     min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -25%, rgba(153, 153, 153, 0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 110%, rgba(153, 153, 153, 0.05), transparent);
   }
 
   .dark body {
@@ -217,5 +223,18 @@
 
   .preserve-3d {
     transform-style: preserve-3d;
+  }
+
+  @keyframes spinSlow {
+    from { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); }
+    to   { transform: rotateX(65deg) rotateY(360deg) rotateZ(0deg); }
+  }
+  .animate-spin-slow {
+    animation: spinSlow 28s linear infinite;
+  }
+
+  @keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
   }
 }

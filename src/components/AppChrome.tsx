@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Navbar } from "@/components/Navbar";
 import { VisitTracker } from "@/components/VisitTracker";
+import { ScrollProgress } from "@/components/effects/ScrollProgress";
+import { MouseGlow } from "@/components/effects/MouseGlow";
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -15,6 +17,8 @@ export function AppChrome({ children }: { children: ReactNode }) {
         <>
           <Navbar />
           <VisitTracker />
+          <ScrollProgress />
+          <MouseGlow />
         </>
       )}
       {children}

@@ -5,6 +5,8 @@ import { Briefcase, MapPin, Star } from "lucide-react";
 import { motion, type Transition } from "framer-motion";
 import { useLanguage } from "@/providers/language-provider";
 import type { PortfolioStatsView, SkillView, ExperienceView, TestimonialView } from "@/lib/data";
+import { AnimatedCounter } from "@/components/effects/AnimatedCounter";
+import { Marquee } from "@/components/effects/Marquee";
 
 const fadeTransition = (delay = 0): Transition => ({
   duration: 0.55,
@@ -21,8 +23,8 @@ type Props = {
 
 export function AboutContent({ stats, skills, experience, testimonials }: Props) {
   const { t } = useLanguage();
-  const expYears = stats.experience_years > 0 ? `${stats.experience_years}+` : "1+";
-  const projectCount = stats.project_count > 0 ? `${stats.project_count}+` : "0";
+  const expYears = stats.experience_years;
+  const projectCount = stats.project_count;
 
   const skillsByGroup = skills.reduce<Record<string, SkillView[]>>((acc, skill) => {
     const group = skill.group ?? "Tooling";
@@ -70,16 +72,20 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
             className="mt-8 grid grid-cols-3 gap-4"
           >
             {[
-              { value: expYears, label: t.yearsExp },
-              { value: projectCount, label: t.projectsDone },
-              { value: `${stats.happy_clients_count}+`, label: t.happyClients },
-            ].map(({ value, label }) => (
+              { value: expYears, suffix: "+", label: t.yearsExp },
+              { value: projectCount, suffix: "+", label: t.projectsDone },
+              { value: stats.happy_clients_count, suffix: "+", label: t.happyClients },
+            ].map(({ value, suffix, label }) => (
               <div
                 key={label}
                 className="card-luxe shine group relative overflow-hidden rounded-2xl p-5"
               >
                 <div className="orb -right-10 -top-10 h-28 w-28 bg-[#999999]/15 dark:bg-[#999999]/10" />
-                <p className="relative z-10 font-serif text-4xl font-bold text-zinc-900 dark:text-white transition-colors group-hover:text-[#999999]">{value}</p>
+                <AnimatedCounter
+                  value={value}
+                  suffix={suffix}
+                  className="relative z-10 font-serif text-4xl font-bold text-zinc-900 transition-colors group-hover:text-[#999999] dark:text-white"
+                />
                 <p className="relative z-10 mt-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
                   {label}
                 </p>
@@ -87,11 +93,33 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
             ))}
           </motion.div>
 
-          {/* Skills grouped */}
+          {/* Tech marquee */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={fadeTransition(0.27)}
+            className="mt-10"
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
+              {t.techStackLabel}
+            </p>
+            <Marquee className="mt-4" speed={34}>
+              {skills.map((skill) => (
+                <span
+                  key={skill.id}
+                  className="chip-3d shrink-0 px-4 py-2 text-xs"
+                >
+                  {skill.name}
+                </span>
+              ))}
+            </Marquee>
+          </motion.div>
+
+          {/* Skills grouped */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={fadeTransition(0.3)}
             className="mt-10 space-y-6"
           >
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
@@ -104,7 +132,7 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
                   {items.map((skill) => (
                     <span
                       key={skill.id}
-                      className="rounded-full border border-zinc-200 bg-zinc-50 px-3.5 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-white/[0.1] dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:border-white/20 dark:hover:text-white"
+                      className="chip-3d px-3.5 py-1.5 text-xs"
                     >
                       {skill.name}
                     </span>
