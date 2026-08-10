@@ -50,6 +50,7 @@ model Profile {
   instagramUrl      String?
   careerStartDate DateTime?
   happyClientsCount Int      @default(20)
+  experienceYearsOverride Int?
   updatedAt         DateTime @updatedAt
 }
 
@@ -114,4 +115,37 @@ model SiteVisit {
 
   @@index([visitorKey])
   @@index([createdAt])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  excerpt   String
+  content   String
+  coverUrl  String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Experience {
+  id          String   @id @default(cuid())
+  role        String
+  company     String
+  period      String
+  description String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  author    String
+  role      String?
+  text      String
+  rating    Int      @default(5)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
 }

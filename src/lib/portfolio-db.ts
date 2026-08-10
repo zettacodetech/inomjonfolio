@@ -6,6 +6,9 @@ import type {
   ProjectRecord,
   SkillRecord,
   TagRecord,
+  PostRecord,
+  ExperienceRecord,
+  TestimonialRecord,
 } from "@/lib/portfolio-serializers";
 
 type ProjectRow = Omit<ProjectRecord, "tags">;
@@ -22,13 +25,21 @@ type RecentVisitRow = {
   referrer: string | null;
   createdAt: string;
 };
+type DailyVisitsRow = {
+  day: string;
+  count: bigint | number | null;
+};
+type PageVisitsRow = {
+  path: string;
+  count: bigint | number | null;
+};
 
 export async function findProfile() {
   const rows = await prisma.$queryRaw<ProfileRecord[]>`
     SELECT id, name, headline, bio, heroImage, headlineUz, headlineEn, headlineRu, bioUz, bioEn, bioRu,
            phoneNumber, contactEmail, location, telegramUrl, githubUrl, linkedinUrl,
            instagramUrl, cvUrl, CAST(careerStartDate AS TEXT) AS careerStartDate,
-           happyClientsCount, updatedAt
+           happyClientsCount, experienceYearsOverride, updatedAt
     FROM Profile
     WHERE id = 'main'
     LIMIT 1
@@ -72,6 +83,7 @@ export async function updateProfile(input: {
   cvUrl: string | null;
   careerStartDate: string | null;
   happyClientsCount: number;
+  experienceYearsOverride: number | null;
   fallbackHeadline: string;
   fallbackBio: string;
 }) {
@@ -96,6 +108,7 @@ export async function updateProfile(input: {
         cvUrl = ${input.cvUrl},
         careerStartDate = ${input.careerStartDate},
         happyClientsCount = ${input.happyClientsCount},
+        experienceYearsOverride = ${input.experienceYearsOverride},
         updatedAt = datetime('now')
     WHERE id = 'main'
   `;
@@ -271,7 +284,7 @@ export async function recordSiteVisit(input: {
 }
 
 export async function getVisitAnalytics() {
-  const [statsRows, recentVisits] = await Promise.all([
+  const [statsRows, recentVisits, dailyRows, pageRows] = await Promise.all([
     prisma.$queryRaw<VisitAnalyticsRow[]>`
       SELECT
         COUNT(*) AS totalVisits,
@@ -285,6 +298,21 @@ export async function getVisitAnalytics() {
       ORDER BY createdAt DESC
       LIMIT 8
     `,
+    prisma.$queryRaw<DailyVisitsRow[]>`
+      SELECT date(createdAt) AS day, COUNT(*) AS count
+      FROM SiteVisit
+      WHERE createdAt >= datetime('now', '-6 days')
+      GROUP BY date(createdAt)
+      ORDER BY day ASC
+    `,
+    prisma.$queryRaw<PageVisitsRow[]>`
+      SELECT path, COUNT(*) AS count
+      FROM SiteVisit
+      WHERE createdAt >= datetime('now', '-30 days')
+      GROUP BY path
+      ORDER BY count DESC
+      LIMIT 6
+    `,
   ]);
   const stats = statsRows[0];
 
@@ -292,6 +320,8 @@ export async function getVisitAnalytics() {
     total_visits: Number(stats?.totalVisits ?? 0),
     unique_visitors: Number(stats?.uniqueVisitors ?? 0),
     today_visits: Number(stats?.todayVisits ?? 0),
+    daily_visits: dailyRows.map((row) => ({ day: row.day, count: Number(row.count ?? 0) })),
+    page_visits: pageRows.map((row) => ({ path: row.path, count: Number(row.count ?? 0) })),
     recent_visits: recentVisits.map((visit) => ({
       id: visit.id,
       visitor_label: `visitor-${visit.visitorKey.slice(0, 8)}`,
@@ -300,4 +330,180 @@ export async function getVisitAnalytics() {
       created_at: visit.createdAt,
     })),
   };
+}
+
+// ─── Blog posts ───────────────────────────────────────────────────────────────
+
+export async function listPosts(includeUnpublished = false) {
+  return prisma.$queryRaw<PostRecord[]>`
+    SELECT id, slug, title, excerpt, content, coverUrl, published,
+           CAST(createdAt AS TEXT) AS createdAt, CAST(updatedAt AS TEXT) AS updatedAt
+    FROM Post
+    ${includeUnpublished ? Prisma.empty : Prisma.sql`WHERE published = 1`}
+    ORDER BY createdAt DESC
+  `;
+}
+
+export async function findPost(slug: string, includeUnpublished = false) {
+  const rows = await prisma.$queryRaw<PostRecord[]>`
+    SELECT id, slug, title, excerpt, content, coverUrl, published,
+           CAST(createdAt AS TEXT) AS createdAt, CAST(updatedAt AS TEXT) AS updatedAt
+    FROM Post
+    WHERE slug = ${slug}
+    ${includeUnpublished ? Prisma.empty : Prisma.sql`AND published = 1`}
+    LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
+export async function createPost(input: {
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverUrl: string | null;
+  published: boolean;
+}) {
+  const id = randomUUID();
+  await prisma.$executeRaw`
+    INSERT INTO Post (id, slug, title, excerpt, content, coverUrl, published, createdAt, updatedAt)
+    VALUES (${id}, ${input.slug}, ${input.title}, ${input.excerpt}, ${input.content},
+            ${input.coverUrl}, ${input.published ? 1 : 0}, datetime('now'), datetime('now'))
+  `;
+  return findPost(input.slug, true);
+}
+
+export async function updatePost(id: string, input: {
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverUrl: string | null;
+  published: boolean;
+}) {
+  await prisma.$executeRaw`
+    UPDATE Post
+    SET slug = ${input.slug}, title = ${input.title}, excerpt = ${input.excerpt},
+        content = ${input.content}, coverUrl = ${input.coverUrl},
+        published = ${input.published ? 1 : 0}, updatedAt = datetime('now')
+    WHERE id = ${id}
+  `;
+  return findPost(input.slug, true);
+}
+
+export async function deletePost(id: string) {
+  await prisma.$executeRaw`DELETE FROM Post WHERE id = ${id}`;
+}
+
+// ─── Experience ───────────────────────────────────────────────────────────────
+
+export async function listExperience() {
+  return prisma.$queryRaw<ExperienceRecord[]>`
+    SELECT id, role, company, period, description, sortOrder, CAST(createdAt AS TEXT) AS createdAt
+    FROM Experience
+    ORDER BY sortOrder ASC, createdAt ASC
+  `;
+}
+
+export async function createExperience(input: {
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+  sortOrder: number;
+}) {
+  const id = randomUUID();
+  await prisma.$executeRaw`
+    INSERT INTO Experience (id, role, company, period, description, sortOrder, createdAt, updatedAt)
+    VALUES (${id}, ${input.role}, ${input.company}, ${input.period}, ${input.description},
+            ${input.sortOrder}, datetime('now'), datetime('now'))
+  `;
+  return id;
+}
+
+export async function updateExperience(id: string, input: {
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+  sortOrder: number;
+}) {
+  await prisma.$executeRaw`
+    UPDATE Experience
+    SET role = ${input.role}, company = ${input.company}, period = ${input.period},
+        description = ${input.description}, sortOrder = ${input.sortOrder}, updatedAt = datetime('now')
+    WHERE id = ${id}
+  `;
+}
+
+export async function deleteExperience(id: string) {
+  await prisma.$executeRaw`DELETE FROM Experience WHERE id = ${id}`;
+}
+
+// ─── Testimonials ─────────────────────────────────────────────────────────────
+
+export async function listTestimonials() {
+  return prisma.$queryRaw<TestimonialRecord[]>`
+    SELECT id, author, role, text, rating, sortOrder, CAST(createdAt AS TEXT) AS createdAt
+    FROM Testimonial
+    ORDER BY sortOrder ASC, createdAt ASC
+  `;
+}
+
+export async function createTestimonial(input: {
+  author: string;
+  role: string | null;
+  text: string;
+  rating: number;
+  sortOrder: number;
+}) {
+  const id = randomUUID();
+  await prisma.$executeRaw`
+    INSERT INTO Testimonial (id, author, role, text, rating, sortOrder, createdAt)
+    VALUES (${id}, ${input.author}, ${input.role}, ${input.text}, ${input.rating},
+            ${input.sortOrder}, datetime('now'))
+  `;
+  return id;
+}
+
+export async function updateTestimonial(id: string, input: {
+  author: string;
+  role: string | null;
+  text: string;
+  rating: number;
+  sortOrder: number;
+}) {
+  await prisma.$executeRaw`
+    UPDATE Testimonial
+    SET author = ${input.author}, role = ${input.role}, text = ${input.text},
+        rating = ${input.rating}, sortOrder = ${input.sortOrder}
+    WHERE id = ${id}
+  `;
+}
+
+export async function deleteTestimonial(id: string) {
+  await prisma.$executeRaw`DELETE FROM Testimonial WHERE id = ${id}`;
+}
+
+// ─── Skills (admin CRUD) ──────────────────────────────────────────────────────
+
+export async function createSkill(input: { name: string; group: string | null; sortOrder: number }) {
+  const id = randomUUID();
+  await prisma.$executeRaw`
+    INSERT INTO Skill (id, name, "group", imageUrl, sortOrder, createdAt, updatedAt)
+    VALUES (${id}, ${input.name}, ${input.group}, '', ${input.sortOrder}, datetime('now'), datetime('now'))
+  `;
+  return id;
+}
+
+export async function updateSkill(id: string, input: { name: string; group: string | null; sortOrder: number }) {
+  await prisma.$executeRaw`
+    UPDATE Skill
+    SET name = ${input.name}, "group" = ${input.group}, sortOrder = ${input.sortOrder}, updatedAt = datetime('now')
+    WHERE id = ${id}
+  `;
+}
+
+export async function deleteSkill(id: string) {
+  await prisma.$executeRaw`DELETE FROM Skill WHERE id = ${id}`;
 }

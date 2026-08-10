@@ -8,8 +8,25 @@ export const metadata = {
   description: "Selected backend projects by Inomjon Toshmirzayev.",
 };
 
-export default async function ProjectsPage() {
-  const projects = await getProjectViews();
+async function getGithubStats() {
+  try {
+    const response = await fetch("https://api.github.com/users/Toshmirzayev-Inomjon", {
+      next: { revalidate: 3600 },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return {
+      followers: data.followers ?? 0,
+      public_repos: data.public_repos ?? 0,
+      avatar: data.avatar_url ?? "",
+    };
+  } catch {
+    return null;
+  }
+}
 
-  return <ProjectsClient projects={projects} />;
+export default async function ProjectsPage() {
+  const [projects, github] = await Promise.all([getProjectViews(), getGithubStats()]);
+
+  return <ProjectsClient projects={projects} github={github} />;
 }

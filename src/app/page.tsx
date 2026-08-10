@@ -1,12 +1,24 @@
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProfileCard } from "@/components/home/ProfileCard";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { getPortfolioStats, getTestimonialViews } from "@/lib/data";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [testimonials, stats] = await Promise.all([
+    getTestimonialViews(),
+    getPortfolioStats(),
+  ]);
+
   return (
     <main className="min-h-screen px-4 pt-28 pb-16">
-      <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
-        <HeroSection />
-        <ProfileCard />
+      <div className="mx-auto max-w-5xl">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
+          <HeroSection />
+          <ProfileCard stats={stats} />
+        </div>
+        <TestimonialsSection testimonials={testimonials} />
       </div>
     </main>
   );

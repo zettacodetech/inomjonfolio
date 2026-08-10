@@ -22,7 +22,7 @@ export function HeroSection() {
       >
         {t.heroTitle1}
         <br />
-        <span className="text-zinc-400 dark:text-zinc-500">{t.heroTitle2}</span>
+        <span className="text-zinc-400 dark:text-[#999999]">{t.heroTitle2}</span>
       </motion.h1>
 
       {/* Subtitle */}

@@ -5,6 +5,8 @@ import {
   LogOut, Plus, Trash2, Pencil, X, Check,
   Tag, FolderKanban, ExternalLink, Github,
   Star, ChevronDown, ChevronUp, Loader2, User,
+  FileText, Code2, Briefcase, MessageSquareQuote, Save,
+  Inbox as InboxIcon, Mail, Phone,
 } from "lucide-react";
 
 // Uses relative URLs — Next.js rewrites proxy /api/v1/* to the backend
@@ -28,6 +30,8 @@ interface AnalyticsData {
   total_visits: number;
   unique_visitors: number;
   today_visits: number;
+  daily_visits: { day: string; count: number }[];
+  page_visits: { path: string; count: number }[];
   recent_visits: {
     id: string;
     visitor_label: string;
@@ -66,6 +70,76 @@ interface ProfileData {
   bio_ru: string | null;
   career_start_date: string | null;
   happy_clients_count: number;
+  experience_years_override: number | null;
+}
+
+// ─── Blog / Experience / Testimonial types ───────────────────────────────────
+
+interface PostItem {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  cover_url: string | null;
+  published: boolean;
+  created_at: string;
+}
+
+interface PostForm {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  cover_url: string;
+  published: boolean;
+}
+
+interface ExperienceItem {
+  id: string;
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+  sort_order: number;
+}
+
+interface ExperienceForm {
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+  sort_order: number;
+}
+
+interface TestimonialItem {
+  id: string;
+  author: string;
+  role: string | null;
+  text: string;
+  rating: number;
+  sort_order: number;
+}
+
+interface TestimonialForm {
+  author: string;
+  role: string;
+  text: string;
+  rating: number;
+  sort_order: number;
+}
+
+interface SkillItem {
+  id: string;
+  name: string;
+  group: string | null;
+  sort_order: number;
+}
+
+interface SkillForm {
+  name: string;
+  group: string;
+  sort_order: number;
 }
 
 // ─── Tiny UI atoms ────────────────────────────────────────────────────────────
@@ -215,7 +289,7 @@ function ProfileEditor({ token }: { token: string }) {
       {/* Stats */}
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
         <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Statistika</p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           {field("Karera boshlangan sana", "career_start_date", "date")}
           <div>
             <Label>Baxtli mijozlar soni</Label>
@@ -226,6 +300,22 @@ function ProfileEditor({ token }: { token: string }) {
               onChange={(e) => set("happy_clients_count", Number(e.target.value))}
               className={inputCls}
             />
+          </div>
+          <div>
+            <Label>Tajriba yillari (avtomatik o'rniga)</Label>
+            <input
+              type="number"
+              min={0}
+              placeholder="Avtomatik: boshlangan sanadan"
+              value={(form.experience_years_override as number | null) ?? ""}
+              onChange={(e) =>
+                set("experience_years_override", e.target.value === "" ? null : Number(e.target.value))
+              }
+              className={inputCls}
+            />
+            <p className="mt-1.5 text-[11px] text-zinc-600">
+              Bo'sh qoldirilsa, karera boshlangan sanadan avtomatik hisoblanadi.
+            </p>
           </div>
         </div>
       </div>
@@ -592,13 +682,635 @@ function ProjectCard({ project, onEdit, onDelete }: {
   );
 }
 
+// ─── Blog Tab ─────────────────────────────────────────────────────────────────
+
+const emptyPostForm = (): PostForm => ({
+  title: "", slug: "", excerpt: "", content: "", cover_url: "", published: true,
+});
+
+const autoSlug = (v: string) => v.toLowerCase()
+  .replace(/[^a-z0-9а-яё\u0400-\u04FF\u00C0-\u024F]+/g, "-")
+  .replace(/^-+|-+$/g, "")
+  .slice(0, 120);
+
+function BlogTab({ token }: { token: string }) {
+  const [posts, setPosts] = useState<PostItem[]>([]);
+  const [form, setForm] = useState<PostForm>(emptyPostForm());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPosts = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/admin/posts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setPosts(await res.json());
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
+  }, [token]);
+
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  const set = (k: keyof PostForm, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!form.title.trim() || form.content.trim().length < 10) {
+      setErr("Sarlavha va matn (kamida 10 belgi) majburiy."); return;
+    }
+    setBusy(true); setErr("");
+    const body = {
+      title: form.title.trim(),
+      slug: form.slug.trim() || autoSlug(form.title),
+      excerpt: form.excerpt.trim(),
+      content: form.content.trim(),
+      cover_url: form.cover_url.trim() || null,
+      published: form.published,
+    };
+    try {
+      const url = editingId
+        ? `/api/v1/admin/posts?id=${editingId}`
+        : `/api/v1/admin/posts`;
+      const res = await fetch(url, {
+        method: editingId ? "PATCH" : "POST",
+        headers: authH(token), body: JSON.stringify(body),
+      });
+      if (!res.ok) { const d = await res.json(); setErr(d.detail ?? "Xatolik."); return; }
+      setForm(emptyPostForm()); setEditingId(null); fetchPosts();
+    } catch { setErr("Tarmoq xatoligi."); }
+    finally { setBusy(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Postni o'chirish?")) return;
+    await fetch(`/api/v1/admin/posts?id=${id}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    });
+    if (editingId === id) { setEditingId(null); setForm(emptyPostForm()); }
+    fetchPosts();
+  };
+
+  const startEdit = (post: PostItem) => {
+    setEditingId(post.id);
+    setForm({
+      title: post.title, slug: post.slug, excerpt: post.excerpt,
+      content: post.content, cover_url: post.cover_url ?? "", published: post.published,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <div className="space-y-6">
+      {loading ? (
+        <div className="flex justify-center py-16"><Loader2 size={24} className="animate-spin text-zinc-600" /></div>
+      ) : (
+        <>
+          {/* Editor */}
+          <div className="rounded-2xl border border-zinc-700/60 bg-[#141414] p-6">
+            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+              {editingId ? "Postni tahrirlash" : "Yangi post"}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Sarlavha</Label>
+                <input placeholder="Portfolio uchun eng yaxshi Next.js sozlamalari"
+                  value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <Label>Slug (avtomatik: sarlavhadan)</Label>
+                <input placeholder="best-nextjs-config"
+                  value={form.slug} onChange={(e) => set("slug", autoSlug(e.target.value))} className={inputCls} />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Qisqa izoh (excerpt)</Label>
+                <input placeholder="Postning 1-2 gap qisqacha tavsifi"
+                  value={form.excerpt} onChange={(e) => set("excerpt", e.target.value)} className={inputCls} />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Cover rasm URL</Label>
+                <input placeholder="https://images.unsplash.com/..."
+                  value={form.cover_url} onChange={(e) => set("cover_url", e.target.value)} className={inputCls} />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Matn (bo'sh qatordan yangi paragraf)</Label>
+                <textarea placeholder="Postning to'liq matni..."
+                  value={form.content} onChange={(e) => set("content", e.target.value)}
+                  rows={8} className={`${inputCls} resize-y`} />
+              </div>
+              <div className="sm:col-span-2">
+                <button type="button" onClick={() => set("published", !form.published)}
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 transition-all ${
+                    form.published ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-800 bg-zinc-900"
+                  }`}>
+                  <span className="text-sm font-medium text-white">
+                    {form.published ? "Chop etilgan (sahifada ko'rinadi)" : "Qoralama (faqat admin ko'radi)"}
+                  </span>
+                  <div className={`flex h-5 w-9 items-center rounded-full transition-colors ${form.published ? "bg-emerald-500" : "bg-zinc-700"}`}>
+                    <span className={`ml-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${form.published ? "translate-x-4" : ""}`} />
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {err && <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-2 text-xs text-red-400">{err}</p>}
+
+            <div className="mt-4 flex items-center gap-3">
+              <button onClick={handleSubmit} disabled={busy}
+                className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-zinc-100 disabled:opacity-60 transition-all active:scale-[0.97]">
+                {busy ? <Spinner /> : <Save size={14} />}
+                {editingId ? "Saqlash" : "Yaratish"}
+              </button>
+              {editingId && (
+                <button onClick={() => { setEditingId(null); setForm(emptyPostForm()); }}
+                  className="rounded-xl border border-zinc-800 px-5 py-2.5 text-sm text-zinc-400 hover:text-white transition-all">
+                  Bekor
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Post list */}
+          <div className="space-y-3">
+            {posts.length === 0 && (
+              <p className="text-sm text-zinc-600">Hali post yo'q. Yuqoridagi forma orqali qo'shing.</p>
+            )}
+            {posts.map((post) => (
+              <div key={post.id} className="group flex items-start gap-3 rounded-2xl border border-zinc-800 bg-[#111111] p-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold text-white">{post.title}</p>
+                    {post.published
+                      ? <Badge variant="green">Chop etilgan</Badge>
+                      : <Badge variant="amber">Qoralama</Badge>}
+                  </div>
+                  <p className="mt-1 line-clamp-1 text-xs text-zinc-500">{post.excerpt}</p>
+                  <p className="mt-0.5 text-[10px] text-zinc-700">
+                    /blog/{post.slug} · {new Date(post.created_at).toLocaleDateString("uz-UZ")}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button onClick={() => startEdit(post)}
+                    className="rounded-xl p-2 text-zinc-600 hover:bg-zinc-800 hover:text-white transition-all" title="Tahrirlash">
+                    <Pencil size={14} />
+                  </button>
+                  <button onClick={() => handleDelete(post.id)}
+                    className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-all" title="O'chirish">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Skills Tab ───────────────────────────────────────────────────────────────
+
+function SkillsTab({ token }: { token: string }) {
+  const [items, setItems] = useState<SkillItem[]>([]);
+  const [form, setForm] = useState<SkillForm>({ name: "", group: "", sort_order: 0 });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const fetchItems = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/admin/skills`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setItems(await res.json());
+    } catch { /* ignore */ }
+  }, [token]);
+
+  useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  const set = (k: keyof SkillForm, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!form.name.trim()) { setErr("Nomi majburiy."); return; }
+    setBusy(true); setErr("");
+    try {
+      const url = editingId ? `/api/v1/admin/skills?id=${editingId}` : `/api/v1/admin/skills`;
+      const res = await fetch(url, {
+        method: editingId ? "PATCH" : "POST",
+        headers: authH(token),
+        body: JSON.stringify({ ...form, group: form.group.trim() || null }),
+      });
+      if (!res.ok) { const d = await res.json(); setErr(d.detail ?? "Xatolik."); return; }
+      setForm({ name: "", group: "", sort_order: 0 }); setEditingId(null); fetchItems();
+    } catch { setErr("Tarmoq xatoligi."); }
+    finally { setBusy(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Skillni o'chirish?")) return;
+    await fetch(`/api/v1/admin/skills?id=${id}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchItems();
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Form */}
+      <div className="rounded-2xl border border-zinc-700/60 bg-[#141414] p-6">
+        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          {editingId ? "Skillni tahrirlash" : "Yangi skill"}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <Label>Nomi</Label>
+            <input placeholder="Python" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Guruh</Label>
+            <input placeholder="Backend / Frontend / Database..." value={form.group}
+              onChange={(e) => set("group", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Tartib (0 = birinchi)</Label>
+            <input type="number" min={0} value={form.sort_order}
+              onChange={(e) => set("sort_order", Number(e.target.value))} className={inputCls} />
+          </div>
+        </div>
+        {err && <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-2 text-xs text-red-400">{err}</p>}
+        <div className="mt-4 flex items-center gap-3">
+          <button onClick={handleSubmit} disabled={busy}
+            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-zinc-100 disabled:opacity-60 transition-all active:scale-[0.97]">
+            {busy ? <Spinner /> : <Save size={14} />}
+            {editingId ? "Saqlash" : "Qo'shish"}
+          </button>
+          {editingId && (
+            <button onClick={() => { setEditingId(null); setForm({ name: "", group: "", sort_order: 0 }); }}
+              className="rounded-xl border border-zinc-800 px-5 py-2.5 text-sm text-zinc-400 hover:text-white transition-all">
+              Bekor
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className="group flex items-center gap-3 rounded-2xl border border-zinc-800 bg-[#111111] px-4 py-3">
+            <Code2 size={14} className="shrink-0 text-zinc-600" />
+            <p className="text-sm font-medium text-white">{item.name}</p>
+            {item.group && <Badge variant="blue">{item.group}</Badge>}
+            <span className="ml-auto text-[10px] text-zinc-700">#{item.sort_order}</span>
+            <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => { setEditingId(item.id); setForm({ name: item.name, group: item.group ?? "", sort_order: item.sort_order }); }}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-zinc-800 hover:text-white transition-all"><Pencil size={14} /></button>
+              <button onClick={() => handleDelete(item.id)}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-sm text-zinc-600">Hali skill yo'q.</p>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Experience Tab ───────────────────────────────────────────────────────────
+
+const emptyExperienceForm = (): ExperienceForm => ({
+  role: "", company: "", period: "", description: "", sort_order: 0,
+});
+
+function ExperienceTab({ token }: { token: string }) {
+  const [items, setItems] = useState<ExperienceItem[]>([]);
+  const [form, setForm] = useState<ExperienceForm>(emptyExperienceForm());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const fetchItems = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/admin/experience`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setItems(await res.json());
+    } catch { /* ignore */ }
+  }, [token]);
+
+  useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  const set = (k: keyof ExperienceForm, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!form.role.trim() || !form.company.trim()) { setErr("Lavozim va kompaniya majburiy."); return; }
+    setBusy(true); setErr("");
+    try {
+      const url = editingId ? `/api/v1/admin/experience?id=${editingId}` : `/api/v1/admin/experience`;
+      const res = await fetch(url, {
+        method: editingId ? "PATCH" : "POST",
+        headers: authH(token), body: JSON.stringify(form),
+      });
+      if (!res.ok) { const d = await res.json(); setErr(d.detail ?? "Xatolik."); return; }
+      setForm(emptyExperienceForm()); setEditingId(null); fetchItems();
+    } catch { setErr("Tarmoq xatoligi."); }
+    finally { setBusy(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tajribani o'chirish?")) return;
+    await fetch(`/api/v1/admin/experience?id=${id}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchItems();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-zinc-700/60 bg-[#141414] p-6">
+        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          {editingId ? "Tajribani tahrirlash" : "Yangi tajriba"}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Lavozim</Label>
+            <input placeholder="Backend Developer" value={form.role} onChange={(e) => set("role", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Kompaniya / Tashkilot</Label>
+            <input placeholder="Mustaqil web loyihalar" value={form.company} onChange={(e) => set("company", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Davr</Label>
+            <input placeholder="2024 - Hozir" value={form.period} onChange={(e) => set("period", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Tartib (0 = birinchi)</Label>
+            <input type="number" min={0} value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} className={inputCls} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Tavsif</Label>
+            <textarea placeholder="Bu davrda nimalar qilgansiz..."
+              value={form.description} onChange={(e) => set("description", e.target.value)}
+              rows={3} className={`${inputCls} resize-none`} />
+          </div>
+        </div>
+        {err && <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-2 text-xs text-red-400">{err}</p>}
+        <div className="mt-4 flex items-center gap-3">
+          <button onClick={handleSubmit} disabled={busy}
+            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-zinc-100 disabled:opacity-60 transition-all active:scale-[0.97]">
+            {busy ? <Spinner /> : <Save size={14} />}
+            {editingId ? "Saqlash" : "Qo'shish"}
+          </button>
+          {editingId && (
+            <button onClick={() => { setEditingId(null); setForm(emptyExperienceForm()); }}
+              className="rounded-xl border border-zinc-800 px-5 py-2.5 text-sm text-zinc-400 hover:text-white transition-all">
+              Bekor
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className="group flex items-start gap-3 rounded-2xl border border-zinc-800 bg-[#111111] p-4">
+            <Briefcase size={14} className="mt-1 shrink-0 text-zinc-600" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-white">{item.role}</p>
+                <Badge>#{item.sort_order}</Badge>
+              </div>
+              <p className="mt-0.5 text-xs text-zinc-400">{item.company} · {item.period}</p>
+              <p className="mt-1 text-xs text-zinc-500 line-clamp-2">{item.description}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => { setEditingId(item.id); setForm(item); }}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-zinc-800 hover:text-white transition-all"><Pencil size={14} /></button>
+              <button onClick={() => handleDelete(item.id)}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-sm text-zinc-600">Hali tajriba yo'q.</p>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Testimonials Tab ─────────────────────────────────────────────────────────
+
+const emptyTestimonialForm = (): TestimonialForm => ({
+  author: "", role: "", text: "", rating: 5, sort_order: 0,
+});
+
+function TestimonialsTab({ token }: { token: string }) {
+  const [items, setItems] = useState<TestimonialItem[]>([]);
+  const [form, setForm] = useState<TestimonialForm>(emptyTestimonialForm());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const fetchItems = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/admin/testimonials`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setItems(await res.json());
+    } catch { /* ignore */ }
+  }, [token]);
+
+  useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  const set = (k: keyof TestimonialForm, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!form.author.trim() || form.text.trim().length < 10) { setErr("Muallif va matn (10+ belgi) majburiy."); return; }
+    setBusy(true); setErr("");
+    try {
+      const url = editingId ? `/api/v1/admin/testimonials?id=${editingId}` : `/api/v1/admin/testimonials`;
+      const res = await fetch(url, {
+        method: editingId ? "PATCH" : "POST",
+        headers: authH(token),
+        body: JSON.stringify({ ...form, role: form.role.trim() || null }),
+      });
+      if (!res.ok) { const d = await res.json(); setErr(d.detail ?? "Xatolik."); return; }
+      setForm(emptyTestimonialForm()); setEditingId(null); fetchItems();
+    } catch { setErr("Tarmoq xatoligi."); }
+    finally { setBusy(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Fikrni o'chirish?")) return;
+    await fetch(`/api/v1/admin/testimonials?id=${id}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchItems();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-zinc-700/60 bg-[#141414] p-6">
+        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          {editingId ? "Fikrni tahrirlash" : "Yangi mijoz fikri"}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Muallif</Label>
+            <input placeholder="Aziza Karimova" value={form.author} onChange={(e) => set("author", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Lavozim</Label>
+            <input placeholder="Startup asoschisi" value={form.role} onChange={(e) => set("role", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Baho (1-5)</Label>
+            <input type="number" min={1} max={5} value={form.rating}
+              onChange={(e) => set("rating", Math.min(5, Math.max(1, Number(e.target.value))))} className={inputCls} />
+          </div>
+          <div>
+            <Label>Tartib</Label>
+            <input type="number" min={0} value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} className={inputCls} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Fikr matni</Label>
+            <textarea placeholder="Inomjon bilan ishlash ajoyib tajriba bo'ldi..."
+              value={form.text} onChange={(e) => set("text", e.target.value)}
+              rows={3} className={`${inputCls} resize-none`} />
+          </div>
+        </div>
+        {err && <p className="mt-3 rounded-xl bg-red-500/10 px-4 py-2 text-xs text-red-400">{err}</p>}
+        <div className="mt-4 flex items-center gap-3">
+          <button onClick={handleSubmit} disabled={busy}
+            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-zinc-100 disabled:opacity-60 transition-all active:scale-[0.97]">
+            {busy ? <Spinner /> : <Save size={14} />}
+            {editingId ? "Saqlash" : "Qo'shish"}
+          </button>
+          {editingId && (
+            <button onClick={() => { setEditingId(null); setForm(emptyTestimonialForm()); }}
+              className="rounded-xl border border-zinc-800 px-5 py-2.5 text-sm text-zinc-400 hover:text-white transition-all">
+              Bekor
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className="group flex items-start gap-3 rounded-2xl border border-zinc-800 bg-[#111111] p-4">
+            <MessageSquareQuote size={14} className="mt-1 shrink-0 text-zinc-600" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-white">{item.author}</p>
+                {item.role && <Badge variant="blue">{item.role}</Badge>}
+                <span className="text-[11px] text-amber-400">{"★".repeat(item.rating)}</span>
+              </div>
+              <p className="mt-1 text-xs text-zinc-500 line-clamp-2">"{item.text}"</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => { setEditingId(item.id); setForm({ author: item.author, role: item.role ?? "", text: item.text, rating: item.rating, sort_order: item.sort_order }); }}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-zinc-800 hover:text-white transition-all"><Pencil size={14} /></button>
+              <button onClick={() => handleDelete(item.id)}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-sm text-zinc-600">Hali fikrlar yo'q.</p>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Inbox Tab ────────────────────────────────────────────────────────────────
+
+interface InboxMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  body: string;
+  created_at: string;
+}
+
+function InboxTab({ token }: { token: string }) {
+  const [messages, setMessages] = useState<InboxMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchInbox = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/admin/inbox`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setMessages(await res.json());
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
+  }, [token]);
+
+  useEffect(() => { fetchInbox(); }, [fetchInbox]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Xabarni o'chirish?")) return;
+    await fetch(`/api/v1/admin/inbox?id=${id}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchInbox();
+  };
+
+  if (loading) {
+    return <div className="flex justify-center py-16"><Loader2 size={24} className="animate-spin text-zinc-600" /></div>;
+  }
+
+  if (messages.length === 0) {
+    return (
+      <div className="flex flex-col items-center rounded-2xl border border-dashed border-zinc-800 py-20 text-center">
+        <InboxIcon size={32} className="mb-3 text-zinc-800" />
+        <p className="text-sm font-medium text-zinc-600">Inbox bo'sh</p>
+        <p className="mt-1 text-xs text-zinc-700">Kontakt formasi orqali xabar kelganda shu yerda ko'rinadi</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {messages.map((msg) => (
+        <div key={msg.id} className="group rounded-2xl border border-zinc-800 bg-[#111111] p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-white">{msg.name}</p>
+                <Badge variant="blue">{msg.subject}</Badge>
+              </div>
+              <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
+                <Mail size={11} /> {msg.email}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <span className="text-[10px] text-zinc-700">
+                {new Date(msg.created_at).toLocaleString("uz-UZ")}
+              </span>
+              <button onClick={() => handleDelete(msg.id)}
+                className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
+                title="O'chirish">
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-zinc-400">{msg.body}</p>
+          <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`}
+            className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-white transition-colors">
+            <Phone size={11} /> Javob yozish
+          </a>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export function AdminDashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const [projects, setProjects]       = useState<Project[]>([]);
   const [tags, setTags]               = useState<TagItem[]>([]);
   const [analytics, setAnalytics]     = useState<AnalyticsData | null>(null);
-  const [tab, setTab]                 = useState<"projects" | "tags" | "profile">("projects");
+  const [tab, setTab]                 = useState<"projects" | "tags" | "profile" | "blog" | "skills" | "experience" | "testimonials" | "inbox">("projects");
   const [showForm, setShowForm]       = useState(false);
   const [editing, setEditing]         = useState<Project | null>(null);
   const [loading, setLoading]         = useState(true);
@@ -655,8 +1367,13 @@ export function AdminDashboard({ token, onLogout }: { token: string; onLogout: (
 
   const tabs = [
     { key: "projects" as const, label: "Loyihalar", icon: <FolderKanban size={13} /> },
-    { key: "tags"     as const, label: "Teglar",    icon: <Tag size={13} /> },
-    { key: "profile"  as const, label: "Profil",    icon: <User size={13} /> },
+    { key: "blog" as const, label: "Blog", icon: <FileText size={13} /> },
+    { key: "skills" as const, label: "Skillar", icon: <Code2 size={13} /> },
+    { key: "experience" as const, label: "Tajriba", icon: <Briefcase size={13} /> },
+    { key: "testimonials" as const, label: "Fikrlar", icon: <MessageSquareQuote size={13} /> },
+    { key: "tags" as const, label: "Teglar", icon: <Tag size={13} /> },
+    { key: "inbox" as const, label: "Inbox", icon: <InboxIcon size={13} /> },
+    { key: "profile" as const, label: "Profil", icon: <User size={13} /> },
   ];
 
   return (
@@ -712,6 +1429,57 @@ export function AdminDashboard({ token, onLogout }: { token: string; onLogout: (
                 Yangilash
               </button>
             </div>
+
+            {/* 7-day chart */}
+            {analytics.daily_visits.length > 0 && (
+              <div className="mb-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  So'nggi 7 kun
+                </p>
+                <div className="flex h-28 items-end gap-2">
+                  {analytics.daily_visits.map((row) => {
+                    const max = Math.max(...analytics.daily_visits.map((r) => r.count), 1);
+                    const height = Math.max(6, Math.round((row.count / max) * 100));
+                    return (
+                      <div key={row.day} className="flex flex-1 flex-col items-center gap-1.5">
+                        <span className="text-[10px] font-semibold text-zinc-400">{row.count}</span>
+                        <div
+                          className="w-full rounded-md bg-emerald-500/70 transition-all hover:bg-emerald-400"
+                          style={{ height: `${height}%`, maxHeight: "92px" }}
+                          title={`${row.day}: ${row.count}`}
+                        />
+                        <span className="text-[9px] text-zinc-600">{row.day.slice(5)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Top pages */}
+            {analytics.page_visits.length > 0 && (
+              <div className="mb-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Top sahifalar (30 kun)
+                </p>
+                <div className="space-y-2">
+                  {analytics.page_visits.map((row) => {
+                    const max = Math.max(...analytics.page_visits.map((r) => r.count), 1);
+                    const width = Math.max(4, Math.round((row.count / max) * 100));
+                    return (
+                      <div key={row.path} className="flex items-center gap-3">
+                        <span className="w-24 shrink-0 truncate text-xs text-zinc-400">{row.path}</span>
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-800">
+                          <div className="h-full rounded-full bg-cyan-500/70" style={{ width: `${width}%` }} />
+                        </div>
+                        <span className="w-6 text-right text-xs font-semibold text-zinc-300">{row.count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {analytics.recent_visits.length === 0 ? (
               <p className="text-sm text-zinc-600">Hali kirishlar yo'q.</p>
             ) : (
@@ -817,6 +1585,21 @@ export function AdminDashboard({ token, onLogout }: { token: string; onLogout: (
         {tab === "tags" && (
           <TagManager token={token} tags={tags} onTagsChange={fetchTags} />
         )}
+
+        {/* ── Blog tab ── */}
+        {tab === "blog" && <BlogTab token={token} />}
+
+        {/* ── Skills tab ── */}
+        {tab === "skills" && <SkillsTab token={token} />}
+
+        {/* ── Experience tab ── */}
+        {tab === "experience" && <ExperienceTab token={token} />}
+
+        {/* ── Testimonials tab ── */}
+        {tab === "testimonials" && <TestimonialsTab token={token} />}
+
+        {/* ── Inbox tab ── */}
+        {tab === "inbox" && <InboxTab token={token} />}
 
         {/* ── Profile tab ── */}
         {tab === "profile" && (

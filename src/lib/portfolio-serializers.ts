@@ -38,6 +38,7 @@ export type ProfileRecord = {
   cvUrl: string | null;
   careerStartDate: Date | string | null;
   happyClientsCount: number;
+  experienceYearsOverride: number | null;
   updatedAt: Date | string;
 };
 
@@ -46,6 +47,38 @@ export type SkillRecord = {
   name: string;
   group: string | null;
   sortOrder: number;
+};
+
+export type PostRecord = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverUrl: string | null;
+  published: boolean | number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+};
+
+export type ExperienceRecord = {
+  id: string;
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+  sortOrder: number;
+  createdAt: Date | string;
+};
+
+export type TestimonialRecord = {
+  id: string;
+  author: string;
+  role: string | null;
+  text: string;
+  rating: number;
+  sortOrder: number;
+  createdAt: Date | string;
 };
 
 function iso(value: Date | string) {
@@ -95,6 +128,7 @@ export function serializeProfile(profile: ProfileRecord) {
       ? iso(profile.careerStartDate).slice(0, 10)
       : null,
     happy_clients_count: profile.happyClientsCount,
+    experience_years_override: profile.experienceYearsOverride,
     updated_at: iso(profile.updatedAt),
   };
 }
@@ -105,6 +139,43 @@ export function serializeSkill(skill: SkillRecord) {
     name: skill.name,
     group: skill.group,
     sort_order: skill.sortOrder,
+  };
+}
+
+export function serializePost(post: PostRecord) {
+  return {
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    content: post.content,
+    cover_url: post.coverUrl,
+    published: Boolean(post.published),
+    created_at: iso(post.createdAt),
+    updated_at: iso(post.updatedAt),
+  };
+}
+
+export function serializeExperience(experience: ExperienceRecord) {
+  return {
+    id: experience.id,
+    role: experience.role,
+    company: experience.company,
+    period: experience.period,
+    description: experience.description,
+    sort_order: experience.sortOrder,
+  };
+}
+
+export function serializeTestimonial(testimonial: TestimonialRecord) {
+  return {
+    id: testimonial.id,
+    author: testimonial.author,
+    role: testimonial.role,
+    text: testimonial.text,
+    rating: testimonial.rating,
+    sort_order: testimonial.sortOrder,
+    created_at: iso(testimonial.createdAt),
   };
 }
 
@@ -120,4 +191,12 @@ export function calculateExperienceYears(startDate: Date | string | null) {
 
   if (!anniversaryPassed) years -= 1;
   return Math.max(0, years);
+}
+
+export function resolveExperienceYears(
+  startDate: Date | string | null,
+  override: number | null,
+) {
+  if (override !== null && override >= 0) return override;
+  return calculateExperienceYears(startDate);
 }

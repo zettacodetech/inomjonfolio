@@ -30,6 +30,11 @@ export async function PUT(request: Request) {
   const text = (key: string) =>
     typeof body[key] === "string" && body[key] ? String(body[key]).trim() : null;
   const happyClientsCount = Number(body.happy_clients_count ?? current.happyClientsCount);
+  const rawOverride = body.experience_years_override;
+  const experienceYearsOverride: number | null =
+    rawOverride === null || rawOverride === undefined || rawOverride === ""
+      ? null
+      : Number(rawOverride);
 
   const profile = await updateProfile({
     name: body.name.trim(),
@@ -51,6 +56,10 @@ export async function PUT(request: Request) {
     happyClientsCount: Number.isFinite(happyClientsCount)
       ? Math.max(0, Math.trunc(happyClientsCount))
       : current.happyClientsCount,
+    experienceYearsOverride:
+      experienceYearsOverride !== null && Number.isFinite(experienceYearsOverride)
+        ? Math.max(0, Math.trunc(experienceYearsOverride))
+        : null,
     fallbackHeadline: current.headline,
     fallbackBio: current.bio,
   });

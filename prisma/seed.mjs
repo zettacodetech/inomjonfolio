@@ -167,6 +167,91 @@ async function main() {
         updatedAt = datetime('now')
     `;
   }
+
+  const experienceSeeds = [
+    {
+      role: "Backend Developer",
+      company: "Mustaqil web loyihalar",
+      period: "2024 - Hozir",
+      description: "Next.js, React, TypeScript, Prisma va Tailwind CSS yordamida portfolio, dashboard va biznes platformalar yaratish."
+    },
+    {
+      role: "Next.js Dasturchi",
+      company: "Web ilovalar va platformalar",
+      period: "2022 - 2024",
+      description: "Responsive interfeyslar, API routelar, autentifikatsiya, admin panellar va database asosidagi funksiyalarni implementatsiya qilish."
+    },
+    {
+      role: "Avtomatlashtirish Dasturchisi",
+      company: "Mijoz integratsiyalari va web yechimlar",
+      period: "2021 - 2022",
+      description: "Biznes jarayonlari uchun integratsiyalar, botlar va qulay web yechimlar yaratish."
+    }
+  ];
+
+  for (const [index, item] of experienceSeeds.entries()) {
+    const exists = await prisma.experience.findFirst({
+      where: { role: item.role, company: item.company }
+    });
+    if (!exists) {
+      await prisma.experience.create({ data: { ...item, sortOrder: index } });
+    }
+  }
+
+  const testimonialSeeds = [
+    {
+      author: "Aziza Karimova",
+      role: "Startup asoschisi",
+      text: "Inomjon bilan ishlash ajoyib tajriba bo'ldi. Platformamiz tez va ishonchli ishlayapti, muammolar ham tez hal qilindi.",
+      rating: 5,
+      sortOrder: 0
+    },
+    {
+      author: "Jasur Toshpo'latov",
+      role: "Kichik biznes egasi",
+      text: "Dashboard yechimi biznes jarayonlarimizni ancha soddalashtirdi. Tavsiya qilaman!",
+      rating: 5,
+      sortOrder: 1
+    },
+    {
+      author: "Nilufar Rahimova",
+      role: "Loyiha menejeri",
+      text: "Texnik savollarga tez javob beradi, ish muddatida tugaydi. Professional backend muhandis.",
+      rating: 4,
+      sortOrder: 2
+    }
+  ];
+
+  for (const item of testimonialSeeds) {
+    const exists = await prisma.testimonial.findFirst({ where: { author: item.author } });
+    if (!exists) {
+      await prisma.testimonial.create({ data: item });
+    }
+  }
+
+  const postSeeds = [
+    {
+      slug: "nextjs-portfolio-sozlamalari",
+      title: "Next.js portfolio sayti uchun eng yaxshi sozlamalar",
+      excerpt: "Next.js 15, Prisma va Tailwind bilan portfolio qurishda foydali maslahatlar va deploy strategiyalari.",
+      content: "Portfolio sayt qurishda asosiy maqsad — tezkorlik, SEO va boshqaruv qulayligi.\n\nNext.js App Router bilan har bir sahifa server tomonda render qilinadi, bu SEO uchun ideal. Prisma ORM orqali ma'lumotlar bazasi bilan ishlash oddiy va xavfsiz.\n\nDeployda SQLite fayli uchun doimiy volume ajratish muhim — aks holda har qayta ishga tushirishda ma'lumotlar yo'qoladi.\n\nAdmin panel orqali kontentni boshqarish esa saytni uzoq muddatda yangi saqlashning eng samarali usuli.",
+      published: true
+    },
+    {
+      slug: "sqlite-va-prisma-deploy",
+      title: "SQLite va Prisma bilan Railway deploy qilish",
+      excerpt: "Railway'da SQLite database'ni volume'da saqlash va migratsiyalarni avtomatik ishga tushirish.",
+      content: "Railway kabi platformalarda SQLite ishlatishda eng katta xatolik — database faylini container ichida yaratishdir.\n\nYechim: volume yaratib, DATABASE_URL ni /data kataloğiga yo'naltirish va start komandaga prisma migrate deploy + seed qo'shish.\n\nShu bilan har bir deployda ma'lumotlar bazasi avtomatik yangilanadi va saqlanadi.",
+      published: true
+    }
+  ];
+
+  for (const post of postSeeds) {
+    const exists = await prisma.post.findFirst({ where: { slug: post.slug } });
+    if (!exists) {
+      await prisma.post.create({ data: post });
+    }
+  }
 }
 
 try {

@@ -1,10 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { findProfile, listProjects, listSkills } from "@/lib/portfolio-db";
 import {
-  calculateExperienceYears,
+  findProfile,
+  listExperience,
+  listPosts,
+  listProjects,
+  listSkills,
+  listTestimonials,
+} from "@/lib/portfolio-db";
+import {
+  resolveExperienceYears,
+  serializeExperience,
+  serializePost,
   serializeProfile,
   serializeProject,
   serializeSkill,
+  serializeTestimonial,
 } from "@/lib/portfolio-serializers";
 
 export type Tag = {
@@ -32,6 +42,7 @@ export type ProfileView = {
   cv_url: string | null;
   career_start_date: string | null;
   happy_clients_count: number;
+  experience_years_override: number | null;
   updated_at: string;
 };
 
@@ -70,6 +81,21 @@ export async function getProjectViews(limit = 100): Promise<ProjectView[]> {
   return projects.map(serializeProject);
 }
 
+export async function getPostViews(includeUnpublished = false): Promise<PostView[]> {
+  const posts = await listPosts(includeUnpublished);
+  return posts.map(serializePost);
+}
+
+export async function getExperienceViews(): Promise<ExperienceView[]> {
+  const items = await listExperience();
+  return items.map(serializeExperience);
+}
+
+export async function getTestimonialViews(): Promise<TestimonialView[]> {
+  const items = await listTestimonials();
+  return items.map(serializeTestimonial);
+}
+
 export async function getSkillViews(): Promise<SkillView[]> {
   const skills = await listSkills();
   return skills.map(serializeSkill);
@@ -86,7 +112,10 @@ export async function getPortfolioStats(): Promise<PortfolioStatsView> {
 
   return {
     project_count: projectCount,
-    experience_years: calculateExperienceYears(profile?.careerStartDate ?? null),
+    experience_years: resolveExperienceYears(
+      profile?.careerStartDate ?? null,
+      profile?.experienceYearsOverride ?? null,
+    ),
     happy_clients_count: profile?.happyClientsCount ?? 0,
   };
 }
@@ -100,3 +129,7 @@ export async function getSiteData() {
   ]);
   return { profile, projects, skills, stats };
 }
+
+export type PostView = ReturnType<typeof serializePost>;
+export type ExperienceView = ReturnType<typeof serializeExperience>;
+export type TestimonialView = ReturnType<typeof serializeTestimonial>;

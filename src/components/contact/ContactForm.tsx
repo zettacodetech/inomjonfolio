@@ -5,7 +5,7 @@ import { motion, type Transition } from "framer-motion";
 import { Send } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
 
-type Status = "idle" | "sending" | "sent";
+type Status = "idle" | "sending" | "sent" | "error";
 
 export function ContactForm() {
   const { t } = useLanguage();
@@ -14,16 +14,29 @@ export function ContactForm() {
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<Status>("idle");
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!name.trim() || !email.trim() || !message.trim()) return;
     setStatus("sending");
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/v1/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (!res.ok) {
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 3000);
+        return;
+      }
       setStatus("sent");
       setName("");
       setEmail("");
       setMessage("");
       setTimeout(() => setStatus("idle"), 3000);
-    }, 1200);
+    } catch {
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 3000);
+    }
   };
 
   const inputClass =
@@ -66,7 +79,7 @@ export function ContactForm() {
 
       <button
         onClick={handleSend}
-        disabled={status !== "idle"}
+        disabled={status === "sending"}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3 text-sm font-semibold text-white transition-all hover:bg-zinc-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-zinc-100"
       >
         {status === "idle" && (
@@ -77,6 +90,7 @@ export function ContactForm() {
         )}
         {status === "sending" && t.sending}
         {status === "sent" && t.sent}
+        {status === "error" && "Xatolik yuz berdi. Qayta urinib ko'ring."}
       </button>
     </motion.div>
   );

@@ -1,10 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { MapPin, Sparkles } from "lucide-react";
 import { motion, type Transition } from "framer-motion";
+import type { PortfolioStatsView } from "@/lib/data";
 
-export function ProfileCard() {
+export function ProfileCard({ stats }: { stats: PortfolioStatsView }) {
+  const expYears = stats.experience_years > 0 ? `${stats.experience_years}+` : "1+";
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 32 }}
@@ -40,7 +43,18 @@ export function ProfileCard() {
             Qashqadaryo, Uzbekistan
           </div>
 
-          {/* Status pill */}
+          {/* Experience badge */}
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-black/[0.07] bg-zinc-50 px-3.5 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.03]">
+            <Sparkles size={13} className="text-zinc-400 dark:text-[#999999]" />
+            <span className="font-serif text-lg font-bold leading-none text-zinc-900 dark:text-white">
+              {expYears}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] leading-tight text-zinc-400 dark:text-zinc-500">
+              Years
+              <br />
+              Experience
+            </span>
+          </div>
         </div>
       </div>
     </motion.div>
