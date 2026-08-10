@@ -107,7 +107,8 @@
     border-color: rgba(153, 153, 153, 0.35);
   }
 
-  /* ── Holographic silver gradient text ── */
+/* ── Holographic silver gradient text ── */
+@layer utilities {
   .text-holo {
     background: linear-gradient(
       130deg,
@@ -121,6 +122,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+}
 
   /* ── Chrome / metallic ring ── */
   .ring-chrome {
