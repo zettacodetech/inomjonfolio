@@ -33,12 +33,13 @@ export function ContactInfoCards() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={ft(0.07 * i)}
-            className="flex items-center gap-4 rounded-2xl border border-black/[0.08] bg-white p-4 shadow-sm dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none"
+            className="card-luxe shine group relative flex items-center gap-4 overflow-hidden rounded-2xl p-4"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 dark:border-white/[0.08] dark:bg-white/[0.03]">
+            <div className="orb -left-10 -top-10 h-24 w-24 bg-[#999999]/15 dark:bg-[#999999]/10" />
+            <div className="ring-chrome relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 dark:border-white/[0.08] transition-transform group-hover:scale-110">
               <Icon size={16} className="text-zinc-500 dark:text-zinc-400" />
             </div>
-            <div>
+            <div className="relative z-10">
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
                 {label}
               </p>

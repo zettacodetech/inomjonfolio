@@ -29,7 +29,7 @@ export function Navbar() {
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4">
-      <nav className="flex items-center gap-1 rounded-full border border-black/10 bg-white/90 px-4 py-2 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-[#111111]/90 dark:shadow-xl">
+      <nav className="ring-chrome flex items-center gap-1 rounded-full border border-black/10 bg-white/90 px-4 py-2 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-[#111111]/90 dark:shadow-xl">
         {/* Nav links */}
         <div className="hidden items-center gap-0.5 md:flex">
           {navLinks.map(({ href, label }) => {
@@ -38,10 +38,10 @@ export function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-all ${
                   active
                     ? "bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white"
-                    : "text-zinc-500 hover:bg-zinc-900/5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
+                    : "text-zinc-500 hover:bg-zinc-900/5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white dark:hover:text-[#999999]"
                 }`}
               >
                 {label}

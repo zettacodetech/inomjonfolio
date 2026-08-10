@@ -32,9 +32,10 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={ft(0.07 * index)}
-            className="flex flex-col rounded-3xl border border-black/[0.08] bg-white p-6 shadow-sm dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none"
+            className="card-luxe shine group relative flex flex-col overflow-hidden rounded-3xl p-6"
           >
-            <div className="flex gap-0.5">
+            <div className="orb -right-16 -top-16 h-36 w-36 bg-[#999999]/15 dark:bg-[#999999]/10" />
+            <div className="relative z-10 flex gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
@@ -47,10 +48,10 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
                 />
               ))}
             </div>
-            <p className="mt-3 flex-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+            <p className="relative z-10 mt-3 flex-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
               "{item.text}"
             </p>
-            <div className="mt-4">
+            <div className="relative z-10 mt-4">
               <p className="text-sm font-semibold text-zinc-900 dark:text-white">{item.author}</p>
               {item.role && <p className="mt-0.5 text-xs text-zinc-400">{item.role}</p>}
             </div>

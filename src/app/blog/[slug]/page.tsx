@@ -31,7 +31,7 @@ export default async function BlogPostPage({
   const view = serializePost(post);
 
   return (
-    <main className="min-h-screen px-4 pt-28 pb-16">
+    <main className="min-h-screen px-4 pt-28 pb-16 dark:bg-white/[0.0]">
       <article className="mx-auto max-w-3xl">
         <Link
           href="/blog"
@@ -55,11 +55,11 @@ export default async function BlogPostPage({
           <img
             src={view.cover_url}
             alt={view.title}
-            className="mt-8 w-full rounded-3xl border border-black/[0.08] dark:border-white/[0.07]"
+            className="mt-8 w-full rounded-3xl border border-black/[0.08] ring-chrome dark:border-white/[0.07]"
           />
         )}
 
-        <div className="prose-prose mt-10 space-y-5 text-[15px] leading-8 text-zinc-600 dark:text-zinc-300">
+        <div className="card-luxe prose-prose mt-10 space-y-5 rounded-3xl p-8 text-[15px] leading-8 text-zinc-600 dark:text-zinc-300">
           {view.content.split("\n\n").map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}

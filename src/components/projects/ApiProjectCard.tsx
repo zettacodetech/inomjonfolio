@@ -49,68 +49,72 @@ export function ApiProjectCard({ project, index }: Props) {
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 * index } as Transition}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-sm transition-all hover:shadow-md dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none dark:hover:border-white/[0.12] dark:hover:shadow-2xl"
+      className="group [perspective:1200px]"
     >
-      {/* Gradient banner */}
-      <div
-        className={`relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br ${style.gradient}`}
-      >
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 select-none font-serif text-[7rem] font-black leading-none text-black/5 dark:text-white/5">
-          {watermark}
-        </span>
-        {project.featured && (
-          <span className="absolute left-3 top-3 rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white/70 backdrop-blur-sm">
-            Featured
-          </span>
-        )}
-        <span
-          className={`relative z-10 rounded-full border bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-sm ${style.tagColor}`}
+      <div className="card-luxe shine relative flex h-full flex-col overflow-hidden rounded-2xl">
+        {/* Gradient banner */}
+        <div
+          className={`relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br ${style.gradient}`}
         >
-          {category}
-        </span>
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-5">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-serif text-lg font-bold leading-tight text-zinc-900 dark:text-white">
-            {project.title}
-          </h3>
-          {project.live_link && (
-            <a
-              href={project.live_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-0.5 shrink-0 text-zinc-300 transition-all group-hover:text-zinc-700 group-hover:scale-110 dark:text-zinc-600 dark:group-hover:text-white"
-            >
-              <ArrowUpRight size={16} />
-            </a>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 select-none font-serif text-[7rem] font-black leading-none text-black/5 dark:text-white/5">
+            {watermark}
+          </span>
+          {project.featured && (
+            <span className="absolute left-3 top-3 rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white/70 backdrop-blur-sm">
+              Featured
+            </span>
           )}
-          {!project.live_link && (
-            <ArrowUpRight
-              size={16}
-              className="mt-0.5 shrink-0 text-zinc-200 dark:text-zinc-700"
-            />
-          )}
+          <span
+            className={`relative z-10 rounded-full border bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-sm ${style.tagColor}`}
+          >
+            {category}
+          </span>
         </div>
 
-        <p className="mt-2.5 flex-1 text-xs leading-6 text-zinc-500">{project.description}</p>
+        {/* Content */}
+        <div className="relative z-10 flex flex-1 flex-col bg-white p-5 dark:bg-[#0c0c0c]">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-serif text-lg font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#999999] dark:text-white">
+              {project.title}
+            </h3>
+            {project.live_link && (
+              <a
+                href={project.live_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-0.5 shrink-0 text-zinc-300 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-zinc-700 dark:text-zinc-600 dark:group-hover:text-white"
+              >
+                <ArrowUpRight size={16} />
+              </a>
+            )}
+            {!project.live_link && (
+              <ArrowUpRight
+                size={16}
+                className="mt-0.5 shrink-0 text-zinc-200 dark:text-zinc-700"
+              />
+            )}
+          </div>
 
-        {/* Tech pills */}
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
-          {stackVisible.map((tech) => (
-            <span
-              key={tech}
-              className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-medium text-zinc-500 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-400"
-            >
-              {tech}
-            </span>
-          ))}
-          {overflow > 0 && (
-            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-medium text-zinc-400 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-500">
-              +{overflow}
-            </span>
-          )}
+          <p className="mt-2.5 flex-1 text-xs leading-6 text-zinc-500 dark:text-zinc-500">
+            {project.description}
+          </p>
+
+          {/* Tech pills */}
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+            {stackVisible.map((tech) => (
+              <span
+                key={tech}
+                className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-medium text-zinc-500 transition-colors group-hover:border-[#999999]/40 group-hover:text-[#999999] dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-400 dark:group-hover:text-[#999999]"
+              >
+                {tech}
+              </span>
+            ))}
+            {overflow > 0 && (
+              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-medium text-zinc-400 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-500">
+                +{overflow}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

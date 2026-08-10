@@ -35,21 +35,22 @@ export default async function BlogPage() {
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group flex flex-col rounded-3xl border border-black/[0.08] bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none dark:hover:border-white/15"
+                className="card-luxe shine group relative flex flex-col overflow-hidden rounded-3xl p-7"
               >
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <div className="orb -right-16 -top-16 h-40 w-40 bg-[#999999]/15 dark:bg-[#999999]/10" />
+                <div className="relative z-10 flex items-center gap-2 text-xs text-zinc-400">
                   <CalendarDays size={13} />
                   {new Date(post.created_at).toLocaleDateString("uz-UZ")}
                 </div>
-                <h2 className="mt-3 font-serif text-2xl font-bold leading-snug text-zinc-900 group-hover:text-zinc-600 dark:text-white dark:group-hover:text-zinc-300">
+                <h2 className="relative z-10 mt-3 font-serif text-2xl font-bold leading-snug text-zinc-900 transition-colors group-hover:text-[#999999] dark:text-white dark:group-hover:text-[#999999]">
                   {post.title}
                 </h2>
                 {post.excerpt && (
-                  <p className="mt-3 flex-1 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                  <p className="relative z-10 mt-3 flex-1 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
                     {post.excerpt}
                   </p>
                 )}
-                <span className="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <span className="relative z-10 mt-6 inline-flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   O'qish
                   <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
                 </span>

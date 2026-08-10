@@ -76,10 +76,11 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
             ].map(({ value, label }) => (
               <div
                 key={label}
-                className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-sm dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none"
+                className="card-luxe shine group relative overflow-hidden rounded-2xl p-5"
               >
-                <p className="font-serif text-4xl font-bold text-zinc-900 dark:text-white">{value}</p>
-                <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+                <div className="orb -right-10 -top-10 h-28 w-28 bg-[#999999]/15 dark:bg-[#999999]/10" />
+                <p className="relative z-10 font-serif text-4xl font-bold text-zinc-900 dark:text-white transition-colors group-hover:text-[#999999]">{value}</p>
+                <p className="relative z-10 mt-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
                   {label}
                 </p>
               </div>
@@ -167,14 +168,14 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
                 transition={{ duration: 0.45, delay: index * 0.06 }}
                 className="relative"
               >
-                <span className="absolute -left-6 top-1 flex h-[15px] w-[15px] items-center justify-center rounded-full border border-zinc-300 bg-white dark:border-white/20 dark:bg-[#1a1a1a]">
+                <span className="absolute -left-6 top-1 flex h-[15px] w-[15px] items-center justify-center rounded-full border border-zinc-300 bg-white ring-chrome dark:border-white/20 dark:bg-[#1a1a1a]">
                   <span className="h-1.5 w-1.5 rounded-full bg-zinc-500 dark:bg-[#999999]" />
                 </span>
-                <div className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-sm dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none">
+                <div className="card-luxe shine rounded-2xl p-5">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <Briefcase size={13} className="text-zinc-400" />
+                    <Briefcase size={13} className="text-zinc-400 dark:text-[#999999]" />
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">{item.role}</h3>
-                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 text-[10px] font-semibold text-zinc-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
+                    <span className="chip-3d px-2.5 py-0.5 text-[10px] font-semibold">
                       {item.period}
                     </span>
                   </div>
@@ -197,9 +198,10 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
             {testimonials.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col rounded-2xl border border-black/[0.08] bg-white p-5 shadow-sm dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none"
+                className="card-luxe shine group relative flex flex-col overflow-hidden rounded-2xl p-5"
               >
-                <div className="flex gap-0.5">
+                <div className="orb -right-12 -top-12 h-32 w-32 bg-[#999999]/15 dark:bg-[#999999]/10" />
+                <div className="relative z-10 flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
@@ -208,8 +210,8 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
                     />
                   ))}
                 </div>
-                <p className="mt-3 flex-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">"{item.text}"</p>
-                <div className="mt-4">
+                <p className="relative z-10 mt-3 flex-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">"{item.text}"</p>
+                <div className="relative z-10 mt-4">
                   <p className="text-sm font-semibold text-zinc-900 dark:text-white">{item.author}</p>
                   {item.role && <p className="text-xs text-zinc-400">{item.role}</p>}
                 </div>
