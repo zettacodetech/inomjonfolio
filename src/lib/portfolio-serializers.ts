@@ -81,8 +81,15 @@ export type TestimonialRecord = {
   createdAt: Date | string;
 };
 
-function iso(value: Date | string) {
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+function iso(value: Date | string | null | undefined): string {
+  if (!value) return "1970-01-01T00:00:00.000Z";
+  try {
+    const date = value instanceof Date ? value : new Date(String(value).replace(" ", "T"));
+    const result = date.toISOString();
+    return Number.isNaN(date.getTime()) ? "1970-01-01T00:00:00.000Z" : result;
+  } catch {
+    return "1970-01-01T00:00:00.000Z";
+  }
 }
 
 export function serializeTag(tag: TagRecord) {
