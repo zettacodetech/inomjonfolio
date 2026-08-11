@@ -12,12 +12,10 @@ const TRACKS = [
 export function AudioPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const indexRef = useRef(0);
-  const startedRef = useRef(false);
 
-  const start = useCallback(() => {
+  const playCurrent = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || startedRef.current) return;
-    startedRef.current = true;
+    if (!audio) return;
     audio.play().catch(() => {});
   }, []);
 
@@ -29,39 +27,44 @@ export function AudioPlayer() {
     audio.play().catch(() => {});
   }, []);
 
+  const resume = useCallback(() => {
+    const audio = audioRef.current;
+    if (audio && audio.paused) {
+      audio.play().catch(() => {});
+    }
+  }, []);
+
   useEffect(() => {
     const audio = new Audio(TRACKS[0]);
-    audio.volume = 0.22;
+    audio.volume = 0.28;
     audio.loop = false;
     audioRef.current = audio;
 
     const onEnded = () => playNext();
     audio.addEventListener("ended", onEnded);
 
+    const onVisibility = () => {
+      if (!document.hidden) resume();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     // Browsers block autoplay with sound until the first user interaction.
-    // Try immediately; if blocked, start on the first interaction of any kind.
-    start();
-    const resume = () => start();
-    const events: (keyof WindowEventMap)[] = [
-      "pointerdown",
-      "keydown",
-      "touchstart",
-      "scroll",
-    ];
-    events.forEach((event) => window.addEventListener(event, resume, { once: true, passive: true }));
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) start();
-    });
+    // Try immediately; if rejected, every first-of-kind interaction retries.
+    playCurrent();
+    const events = ["pointerdown", "keydown", "touchstart", "scroll"] as const;
+    events.forEach((event) =>
+      window.addEventListener(event, resume, { once: true, passive: true })
+    );
 
     return () => {
       events.forEach((event) => window.removeEventListener(event, resume));
-      document.removeEventListener("visibilitychange", () => {});
+      document.removeEventListener("visibilitychange", onVisibility);
       audio.removeEventListener("ended", onEnded);
       audio.pause();
       audio.src = "";
       audioRef.current = null;
     };
-  }, [playNext, start]);
+  }, [playCurrent, playNext, resume]);
 
   return null;
 }
