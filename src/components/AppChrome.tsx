@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { ScrollProgress } from "@/components/effects/ScrollProgress";
 import { MouseGlow } from "@/components/effects/MouseGlow";
@@ -38,8 +39,10 @@ export function AppChrome({ children }: { children: ReactNode }) {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut" }}
+          className="flex min-h-screen flex-col"
         >
-          {children}
+          <div className="flex-1">{children}</div>
+          <Footer />
         </motion.div>
       )}
     </>

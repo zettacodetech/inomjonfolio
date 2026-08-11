@@ -71,23 +71,24 @@ export function ProjectsClient({ projects, github }: Props) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={ft(0.16)}
-            className="mb-8 flex items-center gap-4 rounded-3xl border border-black/[0.08] bg-white p-5 shadow-sm dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-none"
+            className="card-luxe shine relative mb-8 flex items-center gap-4 overflow-hidden rounded-3xl p-6"
           >
+            <div className="orb -right-14 -top-14 h-36 w-36 bg-[#999999]/15 dark:bg-[#999999]/10" />
             {github.avatar && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={github.avatar}
                 alt="GitHub avatar"
-                className="h-12 w-12 rounded-2xl border border-zinc-200 dark:border-white/10"
+                className="ring-chrome h-14 w-14 rounded-2xl border border-zinc-200 dark:border-white/10"
               />
             )}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+            <div className="relative z-10 grid grid-cols-2 gap-x-10 gap-y-1">
               <div>
-                <p className="text-xl font-bold text-zinc-900 dark:text-white">{github.public_repos}</p>
+                <p className="font-serif text-2xl font-bold text-zinc-900 dark:text-white">{github.public_repos}</p>
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">Repositories</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-zinc-900 dark:text-white">{github.followers}</p>
+                <p className="font-serif text-2xl font-bold text-zinc-900 dark:text-white">{github.followers}</p>
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">Followers</p>
               </div>
             </div>
@@ -95,7 +96,7 @@ export function ProjectsClient({ projects, github }: Props) {
               href="https://github.com/Toshmirzayev-Inomjon"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto flex items-center gap-1.5 rounded-full border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-600 transition-all hover:border-zinc-400 hover:text-zinc-900 dark:border-white/10 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white"
+              className="relative z-10 ml-auto flex items-center gap-1.5 rounded-full border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-600 transition-all hover:border-[#999999]/60 hover:text-zinc-900 hover:shadow-[0_0_20px_rgba(153,153,153,0.2)] dark:border-white/10 dark:text-zinc-300 dark:hover:border-[#999999]/50 dark:hover:text-white"
             >
               <Github size={13} />
               GitHub

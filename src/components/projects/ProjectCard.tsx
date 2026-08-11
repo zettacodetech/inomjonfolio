@@ -25,9 +25,11 @@ export function ProjectCard({ project, lang, index }: Props) {
       <div className="card-luxe shine relative flex h-full flex-col overflow-hidden rounded-2xl">
         {/* Gradient header with watermark */}
         <div
-          className={`relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br ${project.gradient}`}
+          className={`relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br ${project.gradient} transition-all duration-500 group-hover:h-44`}
         >
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 select-none font-serif text-[7rem] font-black leading-none text-black/5 dark:text-white/5">
+          <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 transition-transform duration-500 group-hover:scale-125" />
+          <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 transition-transform duration-500 group-hover:scale-125" />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 select-none font-serif text-[8rem] font-black leading-none text-black/5 transition-transform duration-700 group-hover:scale-110 dark:text-white/5">
             {project.watermark}
           </span>
           <span
@@ -40,7 +42,7 @@ export function ProjectCard({ project, lang, index }: Props) {
         {/* Content */}
         <div className="relative z-10 flex flex-1 flex-col bg-white p-5 dark:bg-[#0c0c0c]">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-serif text-lg font-bold leading-tight text-zinc-900 dark:text-white group-hover:text-[#999999] transition-colors">
+            <h3 className="font-serif text-xl font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#999999] dark:text-white">
               {project.title}
             </h3>
             <ArrowUpRight
@@ -49,22 +51,19 @@ export function ProjectCard({ project, lang, index }: Props) {
             />
           </div>
 
-          <p className="mt-2.5 flex-1 text-xs leading-6 text-zinc-500 dark:text-zinc-500">
+          <p className="mt-2.5 flex-1 text-sm leading-6 text-zinc-500 dark:text-zinc-500">
             {project.description[lang]}
           </p>
 
           {/* Tech pills */}
           <div className="mt-4 flex flex-wrap items-center gap-1.5">
             {stackVisible.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-medium text-zinc-500 transition-colors group-hover:border-[#999999]/40 group-hover:text-[#999999] dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-400"
-              >
+              <span key={tech} className="chip-3d px-2.5 py-1 text-[10px]">
                 {tech}
               </span>
             ))}
             {overflow > 0 && (
-              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-medium text-zinc-400 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-500">
+              <span className="chip-3d px-2.5 py-1 text-[10px]">
                 +{overflow}
               </span>
             )}

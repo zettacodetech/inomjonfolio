@@ -144,31 +144,60 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
           </motion.div>
         </div>
 
-        {/* Right: profile image card */}
+        {/* Right: profile image card — rotating frame */}
         <motion.div
           initial={{ opacity: 0, x: 32 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 } as Transition}
-          className="flex justify-center lg:justify-end"
+          className="flex justify-center lg:justify-end [perspective:1200px]"
         >
-          <div className="w-full max-w-[300px] overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-md dark:border-white/[0.07] dark:bg-[#111111] dark:shadow-2xl">
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
-              <Image
-                src="/uploads/profile-inomjon.webp"
-                alt="Inomjon Toshmirzayev"
-                fill
-                className="object-cover object-top"
-                sizes="300px"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent dark:from-[#111111]" />
-            </div>
-            <div className="px-5 pb-5 pt-1">
-              <p className="font-serif text-lg font-semibold text-zinc-900 dark:text-white">
-                Inomjon Toshmirzayev
-              </p>
-              <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
-                <MapPin size={11} />
-                Qashqadaryo, Uzbekistan
+          <div className="group relative w-full max-w-[340px]">
+            {/* Rotating halo frame */}
+            <div className="halo absolute -inset-[2px] rounded-[1.35rem] opacity-50 transition-opacity duration-500 group-hover:opacity-90 dark:opacity-35 dark:group-hover:opacity-70" />
+
+            {/* Glow behind */}
+            <div className="orb absolute -inset-10 -z-10 bg-[#999999]/25 dark:bg-[#999999]/15" />
+
+            <div className="card-luxe relative overflow-hidden rounded-3xl">
+              <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                <Image
+                  src="/uploads/profile-inomjon.webp"
+                  alt="Inomjon Toshmirzayev"
+                  fill
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                  sizes="340px"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent dark:from-[#111111]" />
+              </div>
+
+              {/* Stats strip overlay */}
+              <div className="absolute inset-x-4 bottom-4 z-10 grid grid-cols-2 gap-2">
+                <div className="chip-3d px-3 py-2 text-center backdrop-blur-md">
+                  <p className="font-serif text-xl font-bold text-zinc-900 dark:text-white">
+                    {stats.experience_years > 0 ? `${stats.experience_years}+` : "1+"}
+                  </p>
+                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                    {t.yearsExp}
+                  </p>
+                </div>
+                <div className="chip-3d px-3 py-2 text-center backdrop-blur-md">
+                  <p className="font-serif text-xl font-bold text-zinc-900 dark:text-white">
+                    {stats.project_count}+
+                  </p>
+                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">
+                    {t.projectsDone}
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-5 pb-5 pt-1">
+                <p className="font-serif text-lg font-semibold text-zinc-900 dark:text-white">
+                  Inomjon Toshmirzayev
+                </p>
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                  <MapPin size={11} />
+                  Qashqadaryo, Uzbekistan
+                </div>
               </div>
             </div>
           </div>

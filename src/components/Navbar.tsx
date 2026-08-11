@@ -23,9 +23,17 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const themeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -46,8 +54,18 @@ export function Navbar() {
   ];
 
   return (
-    <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4">
-      <nav className="ring-chrome flex items-center gap-1 rounded-full border border-black/10 bg-white/90 px-4 py-2 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-[#111111]/90 dark:shadow-xl">
+    <header
+      className={`fixed left-0 right-0 top-4 z-50 flex justify-center px-4 transition-all duration-500 ${
+        scrolled ? "top-2" : "top-4"
+      }`}
+    >
+      <nav
+        className={`ring-chrome flex items-center gap-1 rounded-full border px-4 py-2 transition-all duration-500 ${
+          scrolled
+            ? "border-black/15 bg-white/85 shadow-xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0d0d0d]/85 dark:shadow-2xl"
+            : "border-black/10 bg-white/60 backdrop-blur-md dark:border-white/10 dark:bg-[#111111]/60"
+        }`}
+      >
         {/* Nav links */}
         <div className="hidden items-center gap-0.5 md:flex">
           {navLinks.map(({ href, label }) => {
