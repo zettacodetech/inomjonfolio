@@ -27,7 +27,7 @@ export default function NotFound() {
           </div>
           <div className="card-luxe shine relative -mt-10 overflow-hidden rounded-3xl px-10 py-8 text-center">
             <p className="relative z-10 font-serif text-2xl font-bold text-zinc-900 dark:text-white">
-              Bu sahifa 3D dunyoda yo'q
+              Sahifa topilmadi
             </p>
             <p className="relative z-10 mt-2 text-sm text-zinc-500 dark:text-zinc-400">
               Siz noto'g'ri manzilga keldingiz. Bosh sahifaga qayting.
