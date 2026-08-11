@@ -38,10 +38,16 @@ export function ProfileCard({ stats }: { stats: PortfolioStatsView }) {
         }}
         className="card-luxe shine group relative w-full max-w-[320px] rounded-2xl p-[1px] overflow-hidden"
       >
+        {/* Rotating silver halo ring */}
+        <div
+          className="halo absolute inset-[-140px] opacity-60 transition-opacity duration-500 group-hover:opacity-90 dark:opacity-40 dark:group-hover:opacity-70"
+          style={{ zIndex: 1 }}
+        />
+
         {/* Orbital glow halo */}
         <div className="orb -top-20 left-1/2 h-48 w-48 -translate-x-1/2 bg-[#999999]/30 dark:bg-[#999999]/20" />
 
-        <div className="relative overflow-hidden rounded-2xl">
+        <div className="relative overflow-hidden rounded-2xl" style={{ zIndex: 2 }}>
           {/* Profile image */}
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
             <Image

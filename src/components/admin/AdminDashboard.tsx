@@ -133,12 +133,14 @@ interface SkillItem {
   id: string;
   name: string;
   group: string | null;
+  level: number;
   sort_order: number;
 }
 
 interface SkillForm {
   name: string;
   group: string;
+  level: number;
   sort_order: number;
 }
 
@@ -872,7 +874,7 @@ function BlogTab({ token }: { token: string }) {
 
 function SkillsTab({ token }: { token: string }) {
   const [items, setItems] = useState<SkillItem[]>([]);
-  const [form, setForm] = useState<SkillForm>({ name: "", group: "", sort_order: 0 });
+  const [form, setForm] = useState<SkillForm>({ name: "", group: "", level: 80, sort_order: 0 });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -901,7 +903,7 @@ function SkillsTab({ token }: { token: string }) {
         body: JSON.stringify({ ...form, group: form.group.trim() || null }),
       });
       if (!res.ok) { const d = await res.json(); setErr(d.detail ?? "Xatolik."); return; }
-      setForm({ name: "", group: "", sort_order: 0 }); setEditingId(null); fetchItems();
+      setForm({ name: "", group: "", level: 80, sort_order: 0 }); setEditingId(null); fetchItems();
     } catch { setErr("Tarmoq xatoligi."); }
     finally { setBusy(false); }
   };
@@ -921,7 +923,7 @@ function SkillsTab({ token }: { token: string }) {
         <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
           {editingId ? "Skillni tahrirlash" : "Yangi skill"}
         </p>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-4">
           <div>
             <Label>Nomi</Label>
             <input placeholder="Python" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} />
@@ -930,6 +932,11 @@ function SkillsTab({ token }: { token: string }) {
             <Label>Guruh</Label>
             <input placeholder="Backend / Frontend / Database..." value={form.group}
               onChange={(e) => set("group", e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <Label>Daraja % (0-100)</Label>
+            <input type="number" min={0} max={100} value={form.level}
+              onChange={(e) => set("level", Math.min(100, Math.max(0, Number(e.target.value))))} className={inputCls} />
           </div>
           <div>
             <Label>Tartib (0 = birinchi)</Label>
@@ -945,7 +952,7 @@ function SkillsTab({ token }: { token: string }) {
             {editingId ? "Saqlash" : "Qo'shish"}
           </button>
           {editingId && (
-            <button onClick={() => { setEditingId(null); setForm({ name: "", group: "", sort_order: 0 }); }}
+            <button onClick={() => { setEditingId(null); setForm({ name: "", group: "", level: 80, sort_order: 0 }); }}
               className="rounded-xl border border-zinc-800 px-5 py-2.5 text-sm text-zinc-400 hover:text-white transition-all">
               Bekor
             </button>
@@ -960,9 +967,13 @@ function SkillsTab({ token }: { token: string }) {
             <Code2 size={14} className="shrink-0 text-zinc-600" />
             <p className="text-sm font-medium text-white">{item.name}</p>
             {item.group && <Badge variant="blue">{item.group}</Badge>}
+            <div className="ml-3 hidden h-1.5 w-24 overflow-hidden rounded-full bg-zinc-800 sm:block">
+              <div className="h-full rounded-full bg-gradient-to-r from-[#777] to-[#bbb]" style={{ width: `${item.level ?? 80}%` }} />
+            </div>
+            <span className="text-[10px] text-zinc-500">{item.level ?? 80}%</span>
             <span className="ml-auto text-[10px] text-zinc-700">#{item.sort_order}</span>
             <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => { setEditingId(item.id); setForm({ name: item.name, group: item.group ?? "", sort_order: item.sort_order }); }}
+              <button onClick={() => { setEditingId(item.id); setForm({ name: item.name, group: item.group ?? "", level: item.level ?? 80, sort_order: item.sort_order }); }}
                 className="rounded-xl p-2 text-zinc-600 hover:bg-zinc-800 hover:text-white transition-all"><Pencil size={14} /></button>
               <button onClick={() => handleDelete(item.id)}
                 className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-all"><Trash2 size={14} /></button>

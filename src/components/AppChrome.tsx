@@ -8,6 +8,9 @@ import { VisitTracker } from "@/components/VisitTracker";
 import { ScrollProgress } from "@/components/effects/ScrollProgress";
 import { MouseGlow } from "@/components/effects/MouseGlow";
 import { Particles } from "@/components/effects/Particles";
+import { StarField } from "@/components/effects/StarField";
+import { Confetti } from "@/components/effects/Confetti";
+import { Preloader } from "@/components/effects/Preloader";
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -22,6 +25,9 @@ export function AppChrome({ children }: { children: ReactNode }) {
           <ScrollProgress />
           <MouseGlow />
           <Particles />
+          <StarField />
+          <Confetti />
+          <Preloader />
         </>
       )}
       {isAdminRoute ? (

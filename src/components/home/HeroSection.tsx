@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Github, Linkedin, Mail, Send } from "lucide-react";
+import { ArrowRight, Download, Github, Linkedin, Mail, Send } from "lucide-react";
 import { motion, type Transition } from "framer-motion";
 import { useLanguage } from "@/providers/language-provider";
 import { socialLinks } from "@/lib/portfolio-data";
@@ -78,6 +78,16 @@ export function HeroSection() {
           >
             {t.learnMore}
           </Link>
+        </MagneticButton>
+        <MagneticButton strength={0.3}>
+          <a
+            href="/inomjon-cv.pdf"
+            download="Inomjon-Toshmirzayev-CV.pdf"
+            className="ring-chrome inline-flex items-center gap-2 rounded-full border border-[#999999]/50 px-6 py-2.5 text-sm font-semibold text-[#777] transition-all hover:border-[#999999] hover:text-zinc-900 hover:shadow-[0_0_28px_rgba(153,153,153,0.35)] active:scale-95 dark:text-[#999999] dark:hover:text-white"
+          >
+            <Download size={14} />
+            {t.downloadCv}
+          </a>
         </MagneticButton>
       </motion.div>
 

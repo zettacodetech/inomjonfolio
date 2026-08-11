@@ -14,24 +14,26 @@ import { AppChrome } from "@/components/AppChrome";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://toshmirzayev-inomjon.online"),
+  metadataBase: new URL("https://inomjonfolio-production.up.railway.app"),
   title: "Inomjon Toshmirzayev | Backend Developer",
   description:
     "Backend Developer building modern APIs and web platforms with Python, FastAPI, Django, and PostgreSQL.",
-  authors: [{ name: "Inomjon Toshmirzayev", url: "https://toshmirzayev-inomjon.online" }],
+  authors: [{ name: "Inomjon Toshmirzayev", url: "https://inomjonfolio-production.up.railway.app" }],
   creator: "Inomjon Toshmirzayev",
   icons: { icon: "/favicon.ico" },
   openGraph: {
     title: "Inomjon Toshmirzayev | Backend Developer",
     description: "Backend Developer from Uzbekistan.",
-    url: "https://toshmirzayev-inomjon.online",
+    url: "https://inomjonfolio-production.up.railway.app",
     siteName: "Inomjon Toshmirzayev",
     locale: "en_US",
     type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Inomjon Toshmirzayev — Backend Developer" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Inomjon Toshmirzayev | Backend Developer",
+    images: ["/og.png"],
   },
 };
 

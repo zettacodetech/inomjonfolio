@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 type SkillInput = {
   name?: string;
   group?: string;
+  level?: number;
   sort_order?: number;
 };
 
@@ -22,9 +23,13 @@ function parseInput(body: SkillInput) {
   const sortOrder = Number.isFinite(Number(body.sort_order))
     ? Math.max(0, Math.trunc(Number(body.sort_order)))
     : 0;
+  const level = Number.isFinite(Number(body.level))
+    ? Math.min(100, Math.max(0, Math.trunc(Number(body.level))))
+    : 80;
   return {
     name,
     group: typeof body.group === "string" && body.group.trim() ? body.group.trim() : null,
+    level,
     sortOrder,
   };
 }

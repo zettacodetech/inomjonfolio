@@ -32,6 +32,7 @@ export function ContactForm() {
       setName("");
       setEmail("");
       setMessage("");
+      window.dispatchEvent(new CustomEvent("burst-confetti", { detail: { x: window.innerWidth / 2, y: window.innerHeight * 0.4 } }));
       setTimeout(() => setStatus("idle"), 3000);
     } catch {
       setStatus("error");

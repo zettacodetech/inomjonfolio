@@ -33,7 +33,7 @@ const projectSeeds = [
     description: "Statistika, foydalanuvchilar va kontent boshqaruvi uchun zamonaviy boshqaruv paneli.",
     imageUrl: "",
     techStack: "Next.js, TypeScript, Prisma, Tailwind CSS",
-    visitUrl: "https://toshmirzayev-inomjon.online",
+    visitUrl: "https://inomjonfolio-production.up.railway.app",
     githubUrl: "",
     featured: true
   },
@@ -51,7 +51,7 @@ const projectSeeds = [
     description: "Shaxsiy portfolio web-sayti. Next.js va Tailwind CSS yordamida yaratilgan.",
     imageUrl: "",
     techStack: "Next.js, React, TypeScript, Tailwind CSS",
-    visitUrl: "https://toshmirzayev-inomjon.online",
+    visitUrl: "https://inomjonfolio-production.up.railway.app",
     githubUrl: "",
     featured: false
   },
@@ -78,14 +78,14 @@ const skillIconSlugs = {
 };
 
 const skillSeeds = [
-  { name: "React", group: "Frontend" },
-  { name: "Next.js", group: "Frontend" },
-  { name: "TypeScript", group: "Frontend" },
-  { name: "Tailwind CSS", group: "Design" },
-  { name: "Prisma", group: "Database" },
-  { name: "Node.js", group: "Backend" },
-  { name: "PostgreSQL", group: "Database" },
-  { name: "Git", group: "Tooling" }
+  { name: "React", group: "Frontend", level: 90 },
+  { name: "Next.js", group: "Frontend", level: 88 },
+  { name: "TypeScript", group: "Frontend", level: 85 },
+  { name: "Tailwind CSS", group: "Design", level: 92 },
+  { name: "Prisma", group: "Database", level: 84 },
+  { name: "Node.js", group: "Backend", level: 87 },
+  { name: "PostgreSQL", group: "Database", level: 80 },
+  { name: "Git", group: "Tooling", level: 90 }
 ];
 
 function skillIconUrl(name) {
@@ -158,11 +158,12 @@ async function main() {
 
   for (const [index, skill] of skillSeeds.entries()) {
     await prisma.$executeRaw`
-      INSERT INTO Skill (id, name, "group", imageUrl, sortOrder, createdAt, updatedAt)
-      VALUES (${randomUUID()}, ${skill.name}, ${skill.group}, ${skillIconUrl(skill.name)}, ${index}, datetime('now'), datetime('now'))
+      INSERT INTO Skill (id, name, "group", imageUrl, level, sortOrder, createdAt, updatedAt)
+      VALUES (${randomUUID()}, ${skill.name}, ${skill.group}, ${skillIconUrl(skill.name)}, ${skill.level ?? 80}, ${index}, datetime('now'), datetime('now'))
       ON CONFLICT(name) DO UPDATE SET
         "group" = excluded."group",
         imageUrl = excluded.imageUrl,
+        level = excluded.level,
         sortOrder = excluded.sortOrder,
         updatedAt = datetime('now')
     `;

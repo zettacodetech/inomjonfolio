@@ -16,6 +16,7 @@ export const translations = {
     heroDesc: "I build modern backend systems, REST APIs, and business web platforms using Python, FastAPI, Django, and PostgreSQL.",
     viewProjects: "View Projects",
     learnMore: "Learn More",
+    downloadCv: "Download CV",
     // About
     aboutLabel: "ABOUT ME",
     aboutDesc: "I'm a backend developer from Uzbekistan. I craft reliable, scalable APIs and web platforms using Python, FastAPI, Django and PostgreSQL. I prioritise clean architecture, response speed, and real business outcomes.",
@@ -57,6 +58,7 @@ export const translations = {
     heroDesc: "Python, FastAPI, Django va PostgreSQL yordamida zamonaviy backend tizimlari, REST API'lar va biznes web platformalar quraman.",
     viewProjects: "Loyihalarni ko'rish",
     learnMore: "Ko'proq bilish",
+    downloadCv: "CV yuklab olish",
     aboutLabel: "MEN HAQIMDA",
     aboutDesc: "Men O'zbekistonlik backend dasturchiman. Python, FastAPI, Django va PostgreSQL yordamida ishonchli va kengaytiriladigan API'lar hamda web platformalar yarataman. Toza arxitektura, tezkorlik va real biznes natijalari mening asosiy mezonlarim.",
     yearsExp: "YILLIK TAJRIBA",
@@ -95,6 +97,7 @@ export const translations = {
     heroDesc: "Создаю современные backend-системы, REST API и бизнес web-платформы на Python, FastAPI, Django и PostgreSQL.",
     viewProjects: "Смотреть проекты",
     learnMore: "Узнать больше",
+    downloadCv: "Скачать резюме",
     aboutLabel: "ОБО МНЕ",
     aboutDesc: "Я backend-разработчик из Узбекистана. Создаю надёжные и масштабируемые API и web-платформы на Python, FastAPI, Django и PostgreSQL. Ценю чистую архитектуру, высокую скорость и реальные бизнес-результаты.",
     yearsExp: "ЛЕТ ОПЫТА",

@@ -487,19 +487,19 @@ export async function deleteTestimonial(id: string) {
 
 // ─── Skills (admin CRUD) ──────────────────────────────────────────────────────
 
-export async function createSkill(input: { name: string; group: string | null; sortOrder: number }) {
+export async function createSkill(input: { name: string; group: string | null; level: number; sortOrder: number }) {
   const id = randomUUID();
   await prisma.$executeRaw`
-    INSERT INTO Skill (id, name, "group", imageUrl, sortOrder, createdAt, updatedAt)
-    VALUES (${id}, ${input.name}, ${input.group}, '', ${input.sortOrder}, datetime('now'), datetime('now'))
+    INSERT INTO Skill (id, name, "group", imageUrl, level, sortOrder, createdAt, updatedAt)
+    VALUES (${id}, ${input.name}, ${input.group}, '', ${input.level}, ${input.sortOrder}, datetime('now'), datetime('now'))
   `;
   return id;
 }
 
-export async function updateSkill(id: string, input: { name: string; group: string | null; sortOrder: number }) {
+export async function updateSkill(id: string, input: { name: string; group: string | null; level: number; sortOrder: number }) {
   await prisma.$executeRaw`
     UPDATE Skill
-    SET name = ${input.name}, "group" = ${input.group}, sortOrder = ${input.sortOrder}, updatedAt = datetime('now')
+    SET name = ${input.name}, "group" = ${input.group}, level = ${input.level}, sortOrder = ${input.sortOrder}, updatedAt = datetime('now')
     WHERE id = ${id}
   `;
 }

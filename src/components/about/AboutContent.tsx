@@ -7,6 +7,7 @@ import { useLanguage } from "@/providers/language-provider";
 import type { PortfolioStatsView, SkillView, ExperienceView, TestimonialView } from "@/lib/data";
 import { AnimatedCounter } from "@/components/effects/AnimatedCounter";
 import { Marquee } from "@/components/effects/Marquee";
+import { SkillProgressBar } from "@/components/effects/SkillProgressBar";
 
 const fadeTransition = (delay = 0): Transition => ({
   duration: 0.55,
@@ -115,7 +116,7 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
             </Marquee>
           </motion.div>
 
-          {/* Skills grouped */}
+          {/* Skills grouped with progress bars */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -127,15 +128,15 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
             </p>
             {Object.entries(skillsByGroup).map(([group, items]) => (
               <div key={group}>
-                <p className="mb-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400">{group}</p>
-                <div className="flex flex-wrap gap-2">
-                  {items.map((skill) => (
-                    <span
+                <p className="mb-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400">{group}</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {items.map((skill, i) => (
+                    <SkillProgressBar
                       key={skill.id}
-                      className="chip-3d px-3.5 py-1.5 text-xs"
-                    >
-                      {skill.name}
-                    </span>
+                      name={skill.name}
+                      level={skill.level}
+                      delay={i * 0.08}
+                    />
                   ))}
                 </div>
               </div>

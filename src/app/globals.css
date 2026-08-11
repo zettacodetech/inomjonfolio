@@ -237,4 +237,45 @@
     from { transform: translateX(0); }
     to   { transform: translateX(-100%); }
   }
+
+  @keyframes haloSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .halo {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(153, 153, 153, 0.75) 60deg,
+      transparent 130deg,
+      transparent 220deg,
+      rgba(153, 153, 153, 0.4) 300deg,
+      transparent 360deg
+    );
+    animation: haloSpin 6s linear infinite;
+  }
+
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+  }
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(153, 153, 153, 0.08);
+    border-radius: 0.75rem;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(153, 153, 153, 0.14),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
 }

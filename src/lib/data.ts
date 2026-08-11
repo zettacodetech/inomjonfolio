@@ -62,6 +62,7 @@ export type SkillView = {
   id: string;
   name: string;
   group: string | null;
+  level: number;
   sort_order: number;
 };
 

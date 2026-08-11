@@ -46,6 +46,7 @@ export type SkillRecord = {
   id: string;
   name: string;
   group: string | null;
+  level: number | null;
   sortOrder: number;
 };
 
@@ -145,6 +146,7 @@ export function serializeSkill(skill: SkillRecord) {
     id: skill.id,
     name: skill.name,
     group: skill.group,
+    level: skill.level ?? 80,
     sort_order: skill.sortOrder,
   };
 }

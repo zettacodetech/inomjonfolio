@@ -26,7 +26,7 @@ export const siteIdentity = {
   brandName: "Inomjon Toshmirzayev",
   brandBase: "Inomjon",
   brandAccent: "Toshmirzayev",
-  siteUrl: "https://toshmirzayev-inomjon.online",
+  siteUrl: "https://inomjonfolio-production.up.railway.app",
   metadataTitle: "Inomjon Toshmirzayev | Backend Developer",
   metadataDescription: "Zamonaviy web ilovalar, portfolio saytlar, dashboardlar va biznes uchun qulay web platformalar.",
   setupTitle: "Inomjon portfolio sozlashni talab qiladi",
@@ -548,7 +548,7 @@ export const verifyEmailContent = {
 } as const;
 
 export const emailContent = {
-  from: `${siteIdentity.brandName} <no-reply@toshmirzayev-inomjon.online>`,
+  from: `${siteIdentity.brandName} <no-reply@inomjonfolio-production.up.railway.app>`,
   subject: `${siteIdentity.brandName} email tasdiqlash`,
   textPrefix: "Emailingizni tasdiqlang:",
   htmlIntro: `${siteIdentity.brandName} orqali xabar yuborish uchun emailingizni tasdiqlang.`,
