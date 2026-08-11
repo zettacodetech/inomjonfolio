@@ -138,7 +138,7 @@ export async function deleteTag(id: string) {
 
 export async function listSkills() {
   return prisma.$queryRaw<SkillRecord[]>`
-    SELECT id, name, "group", sortOrder FROM Skill ORDER BY sortOrder ASC, name ASC
+    SELECT id, name, "group", level, sortOrder FROM Skill ORDER BY sortOrder ASC, name ASC
   `;
 }
 
