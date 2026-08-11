@@ -14,6 +14,11 @@ import { Confetti } from "@/components/effects/Confetti";
 import { Preloader } from "@/components/effects/Preloader";
 import { CustomCursor } from "@/components/effects/CustomCursor";
 import { AudioPlayer } from "@/components/effects/AudioPlayer";
+import { Aurora } from "@/components/effects/Aurora";
+import { Spotlight } from "@/components/effects/Spotlight";
+import { BackToTop } from "@/components/effects/BackToTop";
+import { SocialSidebar } from "@/components/effects/SocialSidebar";
+import { KeyBurst } from "@/components/effects/KeyBurst";
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -29,10 +34,15 @@ export function AppChrome({ children }: { children: ReactNode }) {
           <MouseGlow />
           <CustomCursor />
           <AudioPlayer />
+          <Aurora />
+          <Spotlight />
+          <KeyBurst />
           <Particles />
           <StarField />
           <Confetti />
           <Preloader />
+          <BackToTop />
+          <SocialSidebar />
         </>
       )}
       {isAdminRoute ? (
@@ -43,7 +53,7 @@ export function AppChrome({ children }: { children: ReactNode }) {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut" }}
-          className="flex min-h-screen flex-col"
+          className="relative z-[1] flex min-h-screen flex-col"
         >
           <div className="flex-1">{children}</div>
           <Footer />

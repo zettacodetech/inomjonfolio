@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, User } from "lucide-react";
 import { findPost } from "@/lib/portfolio-db";
 import { serializePost } from "@/lib/portfolio-serializers";
+import { ReadingProgress } from "@/components/effects/Aurora";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,8 @@ export default async function BlogPostPage({
 
   return (
     <main className="min-h-screen px-4 pt-28 pb-16">
+      <ReadingProgress />
+
       <article className="mx-auto max-w-3xl">
         <Link
           href="/blog"

@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import { ArrowRight, Download, Github, Linkedin, Mail, Send } from "lucide-react";
-import { motion, type Transition } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  type Transition,
+} from "framer-motion";
 import { useLanguage } from "@/providers/language-provider";
 import { socialLinks } from "@/lib/portfolio-data";
 import { TypedText } from "@/components/effects/TypedText";
@@ -13,9 +19,20 @@ const ft = (delay = 0): Transition => ({ duration: 0.55, ease: "easeOut", delay 
 
 export function HeroSection() {
   const { t } = useLanguage();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 120]);
+  const parallaxOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0.2]);
 
   return (
-    <div className="relative flex flex-col justify-center">
+    <motion.div
+      ref={ref}
+      style={{ y: parallaxY, opacity: parallaxOpacity }}
+      className="relative flex flex-col justify-center"
+    >
       <Hero3D />
 
       {/* Giant background watermark */}
@@ -125,6 +142,6 @@ export function HeroSection() {
           </MagneticButton>
         ))}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

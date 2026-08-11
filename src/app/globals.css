@@ -122,6 +122,32 @@
     border-color: rgba(153, 153, 153, 0.35);
   }
 
+  /* ── Spotlight: cursor-following inner glow ── */
+  .card-luxe::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(
+      560px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgba(153, 153, 153, 0.12),
+      transparent 42%
+    );
+  }
+  .dark .card-luxe::before {
+    background: radial-gradient(
+      560px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgba(200, 200, 200, 0.09),
+      transparent 45%
+    );
+  }
+  .card-luxe:hover::before {
+    opacity: 1;
+  }
+
 /* ── Holographic silver gradient text ── */
 @layer utilities {
   .text-holo {
@@ -191,6 +217,65 @@
     filter: blur(70px);
     pointer-events: none;
     animation: orbDrift 14s ease-in-out infinite;
+  }
+
+  /* ── Aurora background light flows ── */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .dark .aurora-blob {
+    opacity: 0.5;
+  }
+  .aurora-blob-1 {
+    width: 52vw;
+    height: 52vw;
+    left: -12vw;
+    top: -14vw;
+    background: radial-gradient(circle, rgba(120, 120, 130, 0.16), transparent 60%);
+    animation: auroraA 26s ease-in-out infinite;
+  }
+  .aurora-blob-2 {
+    width: 44vw;
+    height: 44vw;
+    right: -14vw;
+    top: 24vh;
+    background: radial-gradient(circle, rgba(90, 90, 110, 0.14), transparent 60%);
+    animation: auroraB 32s ease-in-out infinite;
+  }
+  .aurora-blob-3 {
+    width: 40vw;
+    height: 40vw;
+    left: 22vw;
+    bottom: -18vw;
+    background: radial-gradient(circle, rgba(150, 150, 160, 0.1), transparent 60%);
+    animation: auroraC 38s ease-in-out infinite;
+  }
+  @keyframes auroraA {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33%      { transform: translate3d(9vw, 6vh, 0) scale(1.12); }
+    66%      { transform: translate3d(-6vw, 12vh, 0) scale(0.94); }
+  }
+  @keyframes auroraB {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    40%      { transform: translate3d(-10vw, 8vh, 0) scale(1.1); }
+    75%      { transform: translate3d(5vw, -7vh, 0) scale(0.96); }
+  }
+  @keyframes auroraC {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    35%      { transform: translate3d(8vw, -9vh, 0) scale(1.08); }
+    70%      { transform: translate3d(-7vw, -4vh, 0) scale(0.92); }
   }
 
   @keyframes orbDrift {
