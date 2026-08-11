@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  LogOut, Plus, Trash2, Pencil, X, Check,
+  LogOut, Plus, Minus, Trash2, Pencil, X, Check,
   Tag, FolderKanban, ExternalLink, Github,
   Star, ChevronDown, ChevronUp, Loader2, User,
   FileText, Code2, Briefcase, MessageSquareQuote, Save,
@@ -172,6 +172,62 @@ function Spinner() {
   return <Loader2 size={16} className="animate-spin" />;
 }
 
+// ─── Number stepper (+ / −) ──────────────────────────────────────────────────
+
+function yearsSince(dateStr: string | null): number {
+  if (!dateStr) return 0;
+  const start = new Date(dateStr);
+  const now = new Date();
+  let years = now.getUTCFullYear() - start.getUTCFullYear();
+  const annivPassed =
+    now.getUTCMonth() > start.getUTCMonth() ||
+    (now.getUTCMonth() === start.getUTCMonth() && now.getUTCDate() >= start.getUTCDate());
+  if (!annivPassed) years -= 1;
+  return Math.max(0, years);
+}
+
+function Stepper({ label, value, onValueChange, min = 0, autoNote }: {
+  label: string;
+  value: number | null;
+  onValueChange: (v: number | null) => void;
+  min?: number;
+  autoNote?: string;
+}) {
+  const clamp = (v: number) => Math.max(min, Math.trunc(v));
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onValueChange(clamp((value ?? min) - 1))}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-300 transition-all hover:border-zinc-600 hover:text-white active:scale-95"
+          aria-label="Kamaytirish"
+        >
+          <Minus size={15} />
+        </button>
+        <input
+          type="number"
+          min={min}
+          value={value ?? ""}
+          placeholder="Avto"
+          onChange={(e) => onValueChange(e.target.value === "" ? null : clamp(Number(e.target.value)))}
+          className={`${inputCls} text-center text-lg font-bold`}
+        />
+        <button
+          type="button"
+          onClick={() => onValueChange(clamp((value ?? min) + 1))}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-300 transition-all hover:border-zinc-600 hover:text-white active:scale-95"
+          aria-label="Oshirish"
+        >
+          <Plus size={15} />
+        </button>
+      </div>
+      {autoNote && <p className="mt-1.5 text-[11px] text-zinc-600">{autoNote}</p>}
+    </div>
+  );
+}
+
 // ─── Profile Editor tab ───────────────────────────────────────────────────────
 
 function ProfileEditor({ token }: { token: string }) {
@@ -243,6 +299,9 @@ function ProfileEditor({ token }: { token: string }) {
     </div>
   );
 
+  const autoYears = yearsSince(form.career_start_date ?? null);
+  const shownYears = (form.experience_years_override ?? autoYears) || 1;
+
   return (
     <div className="space-y-6">
       {/* Contact info */}
@@ -268,6 +327,42 @@ function ProfileEditor({ token }: { token: string }) {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Statistika</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {field("Karera boshlangan sana", "career_start_date", "date")}
+          <Stepper
+            label="Baxtli mijozlar soni"
+            value={form.happy_clients_count ?? 0}
+            onValueChange={(v) => set("happy_clients_count", v ?? 0)}
+            min={0}
+          />
+          <Stepper
+            label="Tajriba yillari (+/-)"
+            value={form.experience_years_override ?? null}
+            onValueChange={(v) => set("experience_years_override", v)}
+            min={0}
+            autoNote={
+              form.experience_years_override === null
+                ? `Avtomatik: karera boshlangan sanadan hisoblanadi (hozir ${autoYears} yil). + tugmasini bosib oshiring.`
+                : `Qo'lda o'rnatilgan: ${form.experience_years_override} yil. Saytda "${shownYears}+" ko'rinadi. Bo'shatish uchun Avto ni tanlang.`
+            }
+          />
+          <button
+            type="button"
+            onClick={() => set("experience_years_override", null)}
+            className={`h-11 rounded-xl border px-4 text-sm font-semibold transition-all ${
+              form.experience_years_override === null
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600 hover:text-white"
+            }`}
+          >
+            {form.experience_years_override === null ? "Avto (yoniq)" : "Avtomatik holatga qaytarish"}
+          </button>
+        </div>
+      </div>
+
       {/* Headlines */}
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
         <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Sarlavhalar</p>
@@ -285,40 +380,6 @@ function ProfileEditor({ token }: { token: string }) {
           {textarea("Bio (UZ)", "bio_uz")}
           {textarea("Bio (EN)", "bio_en")}
           {textarea("Bio (RU)", "bio_ru")}
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
-        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Statistika</p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {field("Karera boshlangan sana", "career_start_date", "date")}
-          <div>
-            <Label>Baxtli mijozlar soni</Label>
-            <input
-              type="number"
-              min={0}
-              value={(form.happy_clients_count as number) ?? 0}
-              onChange={(e) => set("happy_clients_count", Number(e.target.value))}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <Label>Tajriba yillari (avtomatik o'rniga)</Label>
-            <input
-              type="number"
-              min={0}
-              placeholder="Avtomatik: boshlangan sanadan"
-              value={(form.experience_years_override as number | null) ?? ""}
-              onChange={(e) =>
-                set("experience_years_override", e.target.value === "" ? null : Number(e.target.value))
-              }
-              className={inputCls}
-            />
-            <p className="mt-1.5 text-[11px] text-zinc-600">
-              Bo'sh qoldirilsa, karera boshlangan sanadan avtomatik hisoblanadi.
-            </p>
-          </div>
         </div>
       </div>
 

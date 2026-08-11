@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Menu, Monitor, Moon, Sun, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import type { Lang } from "@/lib/i18n";
@@ -20,10 +20,13 @@ export function Navbar() {
   const { resolvedTheme, setTheme, theme } = useTheme();
   const { lang, setLang, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -35,9 +38,20 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (headerRef.current && !headerRef.current.contains(target)) {
+        setMobileOpen(false);
+      }
+      if (themeRef.current && !themeRef.current.contains(target)) {
         setThemeOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(target)) {
+        setLangOpen(false);
       }
     }
     document.addEventListener("mousedown", onDocClick);
@@ -52,20 +66,21 @@ export function Navbar() {
     { href: "/contact", label: t.contact },
   ];
 
+  const pill =
+    "ring-chrome flex items-center gap-1 rounded-full border px-4 py-2 transition-all duration-500 " +
+    (scrolled
+      ? "border-black/15 bg-white/85 shadow-xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0d0d0d]/85 dark:shadow-2xl"
+      : "border-black/10 bg-white/60 backdrop-blur-md dark:border-white/10 dark:bg-[#111111]/60");
+
   return (
     <header
+      ref={headerRef}
       className={`fixed left-0 right-0 top-4 z-50 flex justify-center px-4 transition-all duration-500 ${
         scrolled ? "top-2" : "top-4"
       }`}
     >
-      <nav
-        className={`ring-chrome flex items-center gap-1 rounded-full border px-4 py-2 transition-all duration-500 ${
-          scrolled
-            ? "border-black/15 bg-white/85 shadow-xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0d0d0d]/85 dark:shadow-2xl"
-            : "border-black/10 bg-white/60 backdrop-blur-md dark:border-white/10 dark:bg-[#111111]/60"
-        }`}
-      >
-        {/* Nav links */}
+      <nav className={`relative ${pill}`}>
+        {/* Nav links (desktop) */}
         <div className="hidden items-center gap-0.5 md:flex">
           {navLinks.map(({ href, label }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -85,8 +100,8 @@ export function Navbar() {
           })}
         </div>
 
-          {/* Controls */}
-          <div className="ml-4 flex items-center gap-1">
+        {/* Controls (desktop) */}
+        <div className="ml-4 hidden items-center gap-1 md:flex">
           {mounted && (
             <div className="relative" ref={themeRef}>
               <button
@@ -124,20 +139,20 @@ export function Navbar() {
             </div>
           )}
 
-          {/* Language dropdown */}
-          <div className="relative">
+          <div className="relative" ref={langRef}>
             <button
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => setLangOpen((v) => !v)}
               className="flex h-8 min-w-[2.5rem] items-center justify-center rounded-full px-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:bg-zinc-900/8 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
+              aria-label="Change language"
             >
               {lang.toUpperCase()}
             </button>
-            {open && (
+            {langOpen && (
               <div className="absolute right-0 top-10 min-w-[80px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-xl dark:border-white/10 dark:bg-[#1a1a1a]">
                 {LANG_VALUES.map((l) => (
                   <button
                     key={l}
-                    onClick={() => { setLang(l); setOpen(false); }}
+                    onClick={() => { setLang(l); setLangOpen(false); }}
                     className={`block w-full px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider transition-colors ${
                       lang === l
                         ? "bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white"
@@ -151,6 +166,88 @@ export function Navbar() {
             )}
           </div>
         </div>
+
+        {/* Hamburger (mobile) */}
+        <button
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={mobileOpen}
+          className="ml-2 flex h-9 w-9 items-center justify-center rounded-full text-zinc-600 transition-colors hover:bg-zinc-900/8 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white md:hidden"
+        >
+          {mobileOpen ? <X size={17} /> : <Menu size={17} />}
+        </button>
+
+        {/* Mobile panel */}
+        {mobileOpen && (
+          <div className="absolute left-1/2 top-[calc(100%+12px)] w-[90vw] max-w-sm -translate-x-1/2 rounded-3xl border border-black/10 bg-white/95 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0d0d0d]/95 md:hidden">
+            <div className="flex flex-col gap-1">
+              {navLinks.map(({ href, label }) => {
+                const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`rounded-2xl px-4 py-2.5 text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white"
+                        : "text-zinc-600 hover:bg-zinc-900/5 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-white/5 dark:hover:text-white"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="my-3.5 h-px bg-black/10 dark:bg-white/10" />
+
+            <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
+              {t.themeLabel}
+            </p>
+            <div className="mt-2 grid grid-cols-3 gap-1.5">
+              {THEME_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const active = theme === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => setTheme(opt.key)}
+                    className={`flex flex-col items-center gap-1 rounded-2xl border px-2 py-2.5 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                      active
+                        ? "border-[#999999]/50 bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white"
+                        : "border-black/10 text-zinc-500 hover:border-black/20 hover:text-zinc-900 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:text-white"
+                    }`}
+                  >
+                    <Icon size={14} />
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="my-3.5 h-px bg-black/10 dark:bg-white/10" />
+
+            <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
+              {t.languageLabel}
+            </p>
+            <div className="mt-2 grid grid-cols-3 gap-1.5">
+              {LANG_VALUES.map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={`rounded-2xl border px-2 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                    lang === l
+                      ? "border-[#999999]/50 bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white"
+                      : "border-black/10 text-zinc-500 hover:border-black/20 hover:text-zinc-900 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:text-white"
+                  }`}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
     </header>
   );
