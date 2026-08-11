@@ -167,7 +167,7 @@ export function AboutContent({ stats, skills, experience, testimonials }: Props)
                   className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                   sizes="340px"
                 />
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent dark:from-[#111111]" />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent dark:from-[#17171a]" />
               </div>
 
               {/* Stats strip overlay */}

@@ -18,6 +18,14 @@ export function HeroSection() {
     <div className="relative flex flex-col justify-center">
       <Hero3D />
 
+      {/* Giant background watermark */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-10 -top-24 z-0 select-none font-serif text-[10rem] font-black leading-none tracking-tighter text-black/[0.03] sm:text-[14rem] lg:text-[17rem] dark:text-white/[0.025]"
+      >
+        {t.heroTitle1}
+      </div>
+
       {/* Halo orbs behind hero text */}
       <div className="orb -left-24 top-0 h-72 w-72 bg-[#999999]/20 dark:bg-[#999999]/15" />
       <div className="orb right-0 top-1/3 h-56 w-56 bg-zinc-300/20 dark:bg-[#999999]/10" />

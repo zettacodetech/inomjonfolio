@@ -12,6 +12,8 @@ import { Particles } from "@/components/effects/Particles";
 import { StarField } from "@/components/effects/StarField";
 import { Confetti } from "@/components/effects/Confetti";
 import { Preloader } from "@/components/effects/Preloader";
+import { CustomCursor } from "@/components/effects/CustomCursor";
+import { AudioPlayer } from "@/components/effects/AudioPlayer";
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -25,6 +27,8 @@ export function AppChrome({ children }: { children: ReactNode }) {
           <VisitTracker />
           <ScrollProgress />
           <MouseGlow />
+          <CustomCursor />
+          <AudioPlayer />
           <Particles />
           <StarField />
           <Confetti />

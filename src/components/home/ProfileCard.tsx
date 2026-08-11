@@ -71,7 +71,7 @@ export function ProfileCard({ stats }: { stats: PortfolioStatsView }) {
                 priority
                 sizes="400px"
               />
-              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent dark:from-[#111111]" />
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent dark:from-[#17171a]" />
             </div>
 
             {/* Info — larger typography */}

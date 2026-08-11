@@ -40,7 +40,7 @@ export function ProjectCard({ project, lang, index }: Props) {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-1 flex-col bg-white p-5 dark:bg-[#0c0c0c]">
+        <div className="relative z-10 flex flex-1 flex-col bg-white p-5 dark:bg-[#131316]">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-serif text-xl font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#999999] dark:text-white">
               {project.title}

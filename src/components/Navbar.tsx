@@ -7,7 +7,6 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import type { Lang } from "@/lib/i18n";
-import { MusicToggle } from "@/components/effects/MusicToggle";
 
 const LANG_VALUES: Lang[] = ["en", "uz", "ru"];
 const THEME_OPTIONS = [
@@ -86,9 +85,8 @@ export function Navbar() {
           })}
         </div>
 
-        {/* Controls */}
-        <div className="ml-4 flex items-center gap-1">
-          {mounted && <MusicToggle />}
+          {/* Controls */}
+          <div className="ml-4 flex items-center gap-1">
           {mounted && (
             <div className="relative" ref={themeRef}>
               <button

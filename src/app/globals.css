@@ -17,8 +17,8 @@
   }
 
   .dark {
-    --bg: #050505;
-    --bg-card: #0c0c0c;
+    --bg: #0d0d0f;
+    --bg-card: #131316;
     --border: rgba(153, 153, 153, 0.16);
     --text: #f5f5f5;
     --muted: #999999;
@@ -55,6 +55,15 @@
       linear-gradient(90deg, rgba(153, 153, 153, 0.025) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 64px 64px, 64px 64px;
     background-attachment: fixed;
+  }
+
+  html.custom-cursor-active,
+  html.custom-cursor-active * {
+    cursor: none !important;
+  }
+  html.custom-cursor-hover .custom-cursor-dot,
+  html.custom-cursor-hover .custom-cursor-ring {
+    opacity: 1;
   }
 
   * {

@@ -1,17 +1,25 @@
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProfileCard } from "@/components/home/ProfileCard";
-import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { ServicesSection } from "@/components/home/ServicesSection";
+import { FeaturedProjects } from "@/components/home/FeaturedProjects";
 import { SkillsMarquee } from "@/components/home/SkillsMarquee";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { Parallax } from "@/components/effects/Parallax";
-import { getPortfolioStats, getSkillViews, getTestimonialViews } from "@/lib/data";
+import {
+  getPortfolioStats,
+  getProjectViews,
+  getSkillViews,
+  getTestimonialViews,
+} from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [testimonials, stats, skills] = await Promise.all([
+  const [testimonials, stats, skills, projects] = await Promise.all([
     getTestimonialViews(),
     getPortfolioStats(),
     getSkillViews(),
+    getProjectViews(3),
   ]);
 
   return (
@@ -21,6 +29,8 @@ export default async function HomePage() {
           <HeroSection />
           <ProfileCard stats={stats} />
         </div>
+        <ServicesSection />
+        <FeaturedProjects projects={projects} />
         <Parallax distance={40}>
           <SkillsMarquee skills={skills} />
         </Parallax>
