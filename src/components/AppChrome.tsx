@@ -2,10 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { VisitTracker } from "@/components/VisitTracker";
 import { ScrollProgress } from "@/components/effects/ScrollProgress";
 import { MouseGlow } from "@/components/effects/MouseGlow";
+import { Particles } from "@/components/effects/Particles";
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -19,9 +21,21 @@ export function AppChrome({ children }: { children: ReactNode }) {
           <VisitTracker />
           <ScrollProgress />
           <MouseGlow />
+          <Particles />
         </>
       )}
-      {children}
+      {isAdminRoute ? (
+        children
+      ) : (
+        <motion.div
+          key={pathname}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+        >
+          {children}
+        </motion.div>
+      )}
     </>
   );
 }

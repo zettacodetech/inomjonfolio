@@ -3,21 +3,38 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Monitor, Moon, Sun } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import type { Lang } from "@/lib/i18n";
 
 const LANG_VALUES: Lang[] = ["en", "uz", "ru"];
+const THEME_OPTIONS = [
+  { key: "system", label: "Auto", icon: Monitor },
+  { key: "light", label: "Light", icon: Sun },
+  { key: "dark", label: "Dark", icon: Moon },
+] as const;
 
 export function Navbar() {
   const pathname = usePathname();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme, theme } = useTheme();
   const { lang, setLang, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const themeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+        setThemeOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
 
   const navLinks = [
     { href: "/", label: t.home },
@@ -53,13 +70,40 @@ export function Navbar() {
         {/* Controls */}
         <div className="ml-4 flex items-center gap-1">
           {mounted && (
-            <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-900/8 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
-              aria-label="Toggle theme"
-            >
-              {resolvedTheme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
+            <div className="relative" ref={themeRef}>
+              <button
+                onClick={() => setThemeOpen((v) => !v)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-900/8 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
+                aria-label="Toggle theme"
+              >
+                {resolvedTheme === "dark" ? <Moon size={15} /> : <Sun size={15} />}
+              </button>
+              {themeOpen && (
+                <div className="absolute right-0 top-10 min-w-[96px] overflow-hidden rounded-xl border border-black/10 bg-white py-1 shadow-xl dark:border-white/10 dark:bg-[#1a1a1a]">
+                  {THEME_OPTIONS.map((opt) => {
+                    const Icon = opt.icon;
+                    const active = theme === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        onClick={() => {
+                          setTheme(opt.key);
+                          setThemeOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                          active
+                            ? "bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white"
+                            : "text-zinc-500 hover:bg-zinc-900/5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
+                        }`}
+                      >
+                        <Icon size={12} />
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Language dropdown */}
